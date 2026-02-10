@@ -1,13 +1,29 @@
 ---
+const title = 'About Us | Freedom Wheels – Scooter Rental Chania';
+const description = 'Freedom Wheels is your scooter rental in Chania, Crete. Learn who we are, why Chania is perfect for scooters, and what we offer. Reliable bikes, helmets, and local advice.';
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 ---
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:locale" content="el_GR" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
 		<link rel="icon" type="image/webp" href="/logos/logo.webp" />
 		<link rel="apple-touch-icon" href="/logos/logo.webp" />
-		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>About Us | Freedom Wheels – Scooter Rental Chania</title>
+		<title>{title}</title>
 	</head>
 	<body>
 		<header class="nav-bar nav-bar--scrolled" id="nav-bar">
@@ -60,15 +76,11 @@
 					<ul class="site-footer__contact">
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">📍</span>
-							<span>Chania, Crete, Greece</span>
+							<span>7 Apokoronou Str, 73100 Chania, Crete, Greece</span>
 						</li>
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">📞</span>
-							<a href="tel:+302821012345">+30 28210 12 345</a>
-						</li>
-						<li>
-							<span class="site-footer__icon" aria-hidden="true">📱</span>
-							<a href="https://wa.me/306931323670">+30 693 132 3670 – WhatsApp | Viber</a>
+							<a href="tel:+302821405794">+30 2821 405 794</a>
 						</li>
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">✉️</span>

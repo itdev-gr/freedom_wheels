@@ -1,13 +1,29 @@
 ---
+const title = 'Contact Us | Freedom Wheels – Scooter Rental Chania';
+const description = 'Contact Freedom Wheels for scooter rental in Chania. Address, opening hours, phone, and email. Send a message or visit us in Chania, Crete.';
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 ---
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:locale" content="el_GR" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
 		<link rel="icon" type="image/webp" href="/logos/logo.webp" />
 		<link rel="apple-touch-icon" href="/logos/logo.webp" />
-		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Contact Us | Freedom Wheels – Scooter Rental Chania</title>
+		<title>{title}</title>
 	</head>
 	<body>
 		<header class="nav-bar nav-bar--scrolled" id="nav-bar">
@@ -27,6 +43,7 @@
 		</header>
 
 		<main class="page">
+			<h1 class="visually-hidden">Contact Freedom Wheels – Scooter rental in Chania, Crete</h1>
 			<section class="contact-hero">
 				<div class="contact-hero__overlay"></div>
 				<div class="contact-hero__content">
@@ -36,7 +53,7 @@
 								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
 							</div>
 							<h3 class="contact-card__title">Διεύθυνση</h3>
-							<p class="contact-card__text">Chania, Crete, Greece</p>
+							<p class="contact-card__text">7 Apokoronou Str, 73100 Chania, Crete, Greece</p>
 						</div>
 						<div class="contact-card">
 							<div class="contact-card__icon" aria-hidden="true">
@@ -57,7 +74,7 @@
 								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
 							</div>
 							<h3 class="contact-card__title">Τηλ. Επικοινωνίας</h3>
-							<p class="contact-card__text"><a href="tel:+302821012345">+30 28210 12 345</a><br /><a href="https://wa.me/306931323670" target="_blank" rel="noopener noreferrer">+30 693 132 3670</a> (WhatsApp | Viber)</p>
+							<p class="contact-card__text"><a href="tel:+302821405794">+30 2821 405 794</a></p>
 						</div>
 					</div>
 				</div>
@@ -89,8 +106,8 @@
 					</div>
 					<div class="contact-map">
 						<iframe
-							title="Chania, Crete on Google Maps"
-							src="https://maps.google.com/maps?q=Chania,+Crete,+Greece&t=&z=14&ie=UTF8&iwloc=&output=embed"
+							title="Freedom Wheels – 7 Apokoronou Str, Chania on Google Maps"
+							src="https://maps.google.com/maps?q=7+Apokoronou+Str,+73100+Chania,+Greece&t=&z=16&ie=UTF8&iwloc=&output=embed"
 							width="100%"
 							height="100%"
 							style="border:0;"
@@ -112,15 +129,11 @@
 					<ul class="site-footer__contact">
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">📍</span>
-							<span>Chania, Crete, Greece</span>
+							<span>7 Apokoronou Str, 73100 Chania, Crete, Greece</span>
 						</li>
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">📞</span>
-							<a href="tel:+302821012345">+30 28210 12 345</a>
-						</li>
-						<li>
-							<span class="site-footer__icon" aria-hidden="true">📱</span>
-							<a href="https://wa.me/306931323670">+30 693 132 3670 – WhatsApp | Viber</a>
+							<a href="tel:+302821405794">+30 2821 405 794</a>
 						</li>
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">✉️</span>
@@ -180,6 +193,18 @@
 
 			.page {
 				padding-top: 70px;
+			}
+
+			.visually-hidden {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				white-space: nowrap;
+				border: 0;
 			}
 
 			.nav-bar {
@@ -288,7 +313,7 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				padding: 3rem 1.5rem 4rem;
+				padding: 0 1.5rem 4rem;
 			}
 
 			.contact-hero__overlay {
@@ -615,7 +640,7 @@
 
 				.contact-hero {
 					min-height: auto;
-					padding: 2rem 1rem 3rem;
+					padding: 0 1rem 3rem;
 				}
 
 				.site-footer__inner {

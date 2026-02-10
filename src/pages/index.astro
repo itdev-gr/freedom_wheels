@@ -1,15 +1,46 @@
 ---
-
+const title = 'Freedom Wheels | Rent a Scooter in Chania, Crete';
+const description = 'Rent a scooter in Chania with Freedom Wheels. Explore the old town, harbour and beaches. Well-maintained scooters, helmets included. Book online or contact us.';
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/logos/logo.webp', Astro.site).href;
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'LocalBusiness',
+	name: 'Freedom Wheels',
+	description: description,
+	url: Astro.site,
+	image: ogImage,
+	address: { '@type': 'PostalAddress', streetAddress: '7 Apokoronou Str', addressLocality: 'Chania', postalCode: '73100', addressRegion: 'Crete', addressCountry: 'GR' },
+	telephone: '+30 2821 405 794',
+	email: 'info@freedomwheels.gr',
+	openingHoursSpecification: [
+		{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '09:00', closes: '19:00' },
+		{ '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '09:00', closes: '14:00' },
+	],
+};
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:locale" content="el_GR" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
 		<link rel="icon" type="image/webp" href="/logos/logo.webp" />
 		<link rel="apple-touch-icon" href="/logos/logo.webp" />
-		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Athens Bike Rental | Rent a Bike in Athens</title>
+		<title>{title}</title>
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 	</head>
 	<body>
 		<main class="hero">
@@ -99,15 +130,11 @@
 					<ul class="site-footer__contact">
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">📍</span>
-							<span>Chania, Crete, Greece</span>
+							<span>7 Apokoronou Str, 73100 Chania, Crete, Greece</span>
 						</li>
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">📞</span>
-							<a href="tel:+302821012345">+30 28210 12 345</a>
-						</li>
-						<li>
-							<span class="site-footer__icon" aria-hidden="true">📱</span>
-							<a href="https://wa.me/306931323670">+30 693 132 3670 – WhatsApp | Viber</a>
+							<a href="tel:+302821405794">+30 2821 405 794</a>
 						</li>
 						<li>
 							<span class="site-footer__icon" aria-hidden="true">✉️</span>

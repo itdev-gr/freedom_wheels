@@ -1,10 +1,18 @@
-# Astro Starter Kit: Minimal
+# Freedom Wheels
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Scooter rental website for Chania, Crete. Built with [Astro](https://astro.build).
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Deploy on Vercel
+
+1. Push your code to GitHub (e.g. [itdev-gr/freedom_wheels](https://github.com/itdev-gr/freedom_wheels)).
+2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project**.
+3. Import your Git repository. Vercel will detect Astro automatically.
+4. **Build Command:** `npm run build` (default)  
+   **Output Directory:** `dist` (default)  
+   **Install Command:** `npm install` (default)
+5. Click **Deploy**. Your site will be live at `https://your-project.vercel.app`.
+
+Optional: install [Vercel CLI](https://vercel.com/docs/cli) and run `vercel` in the project root to deploy from the terminal.
 
 ## 🚀 Project Structure
 
