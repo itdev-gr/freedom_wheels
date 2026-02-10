@@ -67,7 +67,7 @@ const jsonLd = {
 						<span class="logo__text">FREEDOM WHEELS</span>
 					</div>
 					<nav class="nav-bar__links">
-						<a href="#rentals" class="nav-bar__link">Rentals</a>
+						<a href="/rentals" class="nav-bar__link">Rentals</a>
 						<a href="#chania" class="nav-bar__link">Chania</a>
 						<a href="/about" class="nav-bar__link">About us</a>
 						<a href="/contact" class="nav-bar__link">Contact</a>
@@ -247,13 +247,14 @@ const jsonLd = {
 				right: 0;
 				z-index: 30;
 				background-color: transparent;
-				backdrop-filter: blur(8px);
-				transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
+				backdrop-filter: none;
+				transition: background-color 200ms ease-out, box-shadow 200ms ease-out, backdrop-filter 200ms ease-out;
 			}
 
 			.nav-bar--scrolled {
 				background-color: rgba(85, 83, 86, 0.5);
 				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+				backdrop-filter: blur(8px);
 			}
 
 			.nav-bar__inner {
@@ -790,7 +791,9 @@ const jsonLd = {
 				window.addEventListener('scroll', () => {
 					const navBar = document.getElementById('nav-bar');
 					if (!navBar) return;
-					if (window.scrollY > 10) {
+					const hero = document.querySelector('.hero');
+					const heroBottom = hero ? hero.offsetHeight : window.innerHeight;
+					if (window.scrollY >= heroBottom) {
 						navBar.classList.add('nav-bar--scrolled');
 					} else {
 						navBar.classList.remove('nav-bar--scrolled');
