@@ -1,6 +1,6 @@
 ---
-const title = 'Contact Us | Freedom Wheels – Scooter Rental Chania';
-const description = 'Contact Freedom Wheels for scooter rental in Chania. Address, opening hours, phone, and email. Send a message or visit us in Chania, Crete.';
+const title = 'Discover Chania | Freedom Wheels – Scooter Rental Chania';
+const description = 'Explore Chania by scooter: old town, Venetian harbour, beaches of Agia Marina and Platanias. Freedom Wheels offers scooter rental in Chania, Crete. Book online or contact us.';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 ---
@@ -26,6 +26,9 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 		<title>{title}</title>
 	</head>
 	<body>
+		<section class="chania-hero">
+			<img src="/images/chania-scooter-sea.png" alt="Explore Chania by scooter with a view of the sea" class="chania-hero__img" />
+		</section>
 		<header class="nav-bar nav-bar--scrolled" id="nav-bar">
 			<div class="nav-bar__inner">
 				<a href="/" class="logo">
@@ -34,91 +37,55 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 				</a>
 				<nav class="nav-bar__links">
 					<a href="/rentals" class="nav-bar__link">Rentals</a>
-					<a href="/chania" class="nav-bar__link">Chania</a>
+					<a href="/chania" class="nav-bar__link nav-bar__link--active">Chania</a>
 					<a href="/about" class="nav-bar__link">About us</a>
-					<a href="/contact" class="nav-bar__link nav-bar__link--active">Contact</a>
+					<a href="/contact" class="nav-bar__link">Contact</a>
 					<a href="/book" class="nav-bar__cta">Book now</a>
 				</nav>
 			</div>
 		</header>
 
-		<main class="page">
-			<h1 class="visually-hidden">Contact Freedom Wheels – Scooter rental in Chania, Crete</h1>
-			<section class="contact-hero">
-				<div class="contact-hero__overlay"></div>
-				<div class="contact-hero__content">
-					<div class="contact-cards">
-						<div class="contact-card">
-							<div class="contact-card__icon" aria-hidden="true">
-								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-							</div>
-							<h3 class="contact-card__title">Διεύθυνση</h3>
-							<p class="contact-card__text">7 Apokoronou Str, 73100 Chania, Crete, Greece</p>
-						</div>
-						<div class="contact-card">
-							<div class="contact-card__icon" aria-hidden="true">
-								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-							</div>
-							<h3 class="contact-card__title">Ωράριο</h3>
-							<p class="contact-card__text">Δευ-Παρ 09:00-19:00<br />Σαβ. 09:00-14:00<br />Κυρ. Κλειστά</p>
-						</div>
-						<div class="contact-card">
-							<div class="contact-card__icon" aria-hidden="true">
-								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
-							</div>
-							<h3 class="contact-card__title">Email Address</h3>
-							<p class="contact-card__text"><a href="mailto:info@freedomwheels.gr">info@freedomwheels.gr</a></p>
-						</div>
-						<div class="contact-card">
-							<div class="contact-card__icon" aria-hidden="true">
-								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-							</div>
-							<h3 class="contact-card__title">Τηλ. Επικοινωνίας</h3>
-							<p class="contact-card__text"><a href="tel:+302821405794">+30 2821 405 794</a></p>
-						</div>
-					</div>
+		<main class="page page--image-top">
+			<section class="discover-chania">
+				<div class="discover-chania__content">
+					<h2 class="discover-chania__title">Vamos - Kefalas - Kokkino Xorio - Gavalochori - Douliana - Vamos</h2>
+					<p class="discover-chania__text">A 28 km asphalt route winds through well-preserved traditional neighborhoods, blending medieval, 19th-century, and modern architecture. Along the way, you'll pass impressive village churches, historic school buildings, cultivated land, and untouched nature. Views of the Northern Cretan Sea and the White Mountains accompany you throughout, with opportunities to meet locals in the village squares.</p>
+					<a href="/book" class="discover-chania__btn">Book Now</a>
+				</div>
+				<div class="discover-chania__media">
+					<img src="/images/chania%20port.jpg" alt="Group with scooters by the sea in Chania" class="discover-chania__img" />
 				</div>
 			</section>
-
-			<section class="contact-form-wrap">
-				<div class="contact-form-wrap__inner">
-					<div class="contact-form-section">
-						<h2 class="contact-form-section__title">Στείλτε μας μήνυμα</h2>
-						<form class="contact-form" id="contact-form" action="#" method="post">
-							<div class="contact-form__row">
-								<label class="contact-form__label" for="name">Όνομα *</label>
-								<input class="contact-form__input" id="name" name="name" type="text" required />
-							</div>
-							<div class="contact-form__row">
-								<label class="contact-form__label" for="email">Email *</label>
-								<input class="contact-form__input" id="email" name="email" type="email" required />
-							</div>
-							<div class="contact-form__row">
-								<label class="contact-form__label" for="phone">Τηλέφωνο</label>
-								<input class="contact-form__input" id="phone" name="phone" type="tel" />
-							</div>
-							<div class="contact-form__row">
-								<label class="contact-form__label" for="message">Μήνυμα *</label>
-								<textarea class="contact-form__input contact-form__textarea" id="message" name="message" rows="5" required></textarea>
-							</div>
-							<button type="submit" class="contact-form__submit">Αποστολή</button>
-						</form>
-					</div>
-					<div class="contact-map">
-						<iframe
-							title="Freedom Wheels – 7 Apokoronou Str, Chania on Google Maps"
-							src="https://maps.google.com/maps?q=7+Apokoronou+Str,+73100+Chania,+Greece&t=&z=16&ie=UTF8&iwloc=&output=embed"
-							width="100%"
-							height="100%"
-							style="border:0;"
-							allowfullscreen=""
-							loading="lazy"
-							referrerpolicy="no-referrer-when-downgrade"
-						></iframe>
-					</div>
+			<section class="discover-chania discover-chania--reverse">
+				<div class="discover-chania__content">
+					<h2 class="discover-chania__title">Vamos – Therissos</h2>
+					<p class="discover-chania__text">A 45 km route (35 km return) along a scenic asphalt road at 1,000 m altitude offers breathtaking views over Souda Bay. The journey passes through striking natural formations and the gorges of Macheri, Diktamos, and Therisos, revealing dramatic contrasts between wild, arid hills, lush forested slopes, and old rustic villages.</p>
+					<a href="/book" class="discover-chania__btn">Book Now</a>
+				</div>
+				<div class="discover-chania__media">
+					<img src="/images/chania-scooter-sea.png" alt="Scooter ride with a view of the sea in Chania" class="discover-chania__img" />
 				</div>
 			</section>
-
+			<section class="discover-chania">
+				<div class="discover-chania__content">
+					<h2 class="discover-chania__title">Vamos - Georgoupoli - Lake Kournas - waterfalls of Argiroupoli</h2>
+					<p class="discover-chania__text">A 25 km journey along a pleasant asphalt road, with the White Mountains stretching out on the right and views over Georgioupoli Bay on the left. After Georgioupoli, stop at the lake to explore its rich flora and fauna by pedalo, then continue toward Argyroupoli via Kournas village, surrounded by lush greenery and freshwater waterfalls.</p>
+					<a href="/book" class="discover-chania__btn">Book Now</a>
+				</div>
+				<div class="discover-chania__media">
+					<img src="/images/chania%20port.jpg" alt="Group with scooters by the sea in Chania" class="discover-chania__img" />
+				</div>
+			</section>
+			<section class="discover-chania discover-chania--reverse">
+				<div class="discover-chania__content">
+					<h2 class="discover-chania__title">Vamos - Kalamitsi Aleksandrou - Vrises - Alikambos - Vafes – Tzitzifes - Fres - Pemonia - Kania - Vamos</h2>
+					<p class="discover-chania__text">A 28 km easy asphalt route through traditional villages and lush green forest roads. Enjoy a stop in Vrisses for Greek yogurt with honey under the large plane trees by the river, followed by wine tasting at Dourakis, one of the finest Cretan wine producers, in Alikampos. The route continues through the unspoiled villages of Vafes and Tzitzifes, ending with a relaxing coffee in the beautiful square of Fre.</p>
+					<a href="/book" class="discover-chania__btn">Book Now</a>
+				</div>
+				<div class="discover-chania__media">
+					<img src="/images/chania-scooter-sea.png" alt="Scooter ride with a view of the sea in Chania" class="discover-chania__img" />
+				</div>
+			</section>
 		<footer class="site-footer">
 			<div class="site-footer__inner">
 				<div class="site-footer__col site-footer__company">
@@ -195,16 +162,8 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 				padding-top: 70px;
 			}
 
-			.visually-hidden {
-				position: absolute;
-				width: 1px;
-				height: 1px;
-				padding: 0;
-				margin: -1px;
-				overflow: hidden;
-				clip: rect(0, 0, 0, 0);
-				white-space: nowrap;
-				border: 0;
+			.page--image-top {
+				padding-top: 0;
 			}
 
 			.nav-bar {
@@ -303,193 +262,123 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 				background-color: #333;
 			}
 
-			/* Contact hero: background image + cards */
-			.contact-hero {
-				position: relative;
-				min-height: 520px;
-				background-image: url("/images/chania%20port.jpg");
-				background-size: cover;
-				background-position: center;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				padding: 0 1.5rem 4rem;
-			}
-
-			.contact-hero__overlay {
-				position: absolute;
-				inset: 0;
-				background: rgba(0, 0, 0, 0.35);
-			}
-
-			.contact-hero__content {
-				position: relative;
-				z-index: 1;
+			.chania-hero {
 				width: 100%;
-				max-width: 900px;
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-			}
-
-			.contact-cards {
-				display: grid;
-				grid-template-columns: repeat(4, 1fr);
-				gap: 1.25rem;
-				width: 100%;
-				max-width: 1100px;
-			}
-
-			.contact-card {
-				background: #fff;
-				border-radius: 12px;
-				padding: 1.5rem;
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-				transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
-			}
-
-			.contact-card:hover {
-				transform: translateY(-4px);
-				box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-			}
-
-			.contact-card__icon {
-				color: #ea580c;
-				margin-bottom: 0.75rem;
-			}
-
-			.contact-card__title {
-				font-family: var(--font-body);
-				font-size: 1rem;
-				font-weight: 600;
-				color: #2a9fb5;
-				margin: 0 0 0.5rem;
-			}
-
-			.contact-card__text {
-				font-size: 0.95rem;
-				line-height: 1.5;
-				color: #374151;
-				margin: 0;
-			}
-
-			.contact-card__text a {
-				color: #2a9fb5;
-				text-decoration: none;
-			}
-
-			.contact-card__text a:hover {
-				text-decoration: underline;
-			}
-
-			.contact-form-wrap {
-				background: #f8f9fa;
-				padding: 3rem 2rem 4rem;
-			}
-
-			.contact-form-wrap__inner {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 2rem;
-				max-width: 1200px;
-				margin: 0 auto;
-				align-items: start;
-			}
-
-			.contact-form-section {
-				background: #fff;
-				border-radius: 12px;
-				padding: 2rem;
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-			}
-
-			.contact-map {
-				position: relative;
-				width: 100%;
-				min-height: 400px;
-				background: #e5e7eb;
-				border-radius: 12px;
+				height: 100vh;
+				max-height: 100vh;
 				overflow: hidden;
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 			}
 
-			.contact-map iframe {
-				position: absolute;
-				top: 0;
-				left: 0;
+			.chania-hero__img {
 				width: 100%;
 				height: 100%;
-				min-height: 400px;
+				display: block;
+				object-fit: cover;
 			}
 
-			.contact-form-section__title {
-				font-family: var(--font-body);
-				font-size: 1.25rem;
-				font-weight: 600;
-				color: #2a9fb5;
-				margin: 0 0 1.5rem;
+			.discover-chania {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				min-height: 0;
 			}
 
-			.contact-form {
-				display: flex;
-				flex-direction: column;
-				gap: 1rem;
-			}
-
-			.contact-form__row {
-				display: flex;
-				flex-direction: column;
-				gap: 0.35rem;
-			}
-
-			.contact-form__label {
-				font-size: 0.9rem;
-				font-weight: 500;
-				color: #374151;
-			}
-
-			.contact-form__input {
-				font-family: var(--font-body);
-				font-size: 1rem;
-				padding: 0.65rem 0.85rem;
-				border: 1px solid #d1d5db;
-				border-radius: 8px;
+			.discover-chania__content {
 				background: #fff;
-				color: #1a1a1a;
-				transition: border-color 0.2s ease, box-shadow 0.2s ease;
+				padding: 3rem 2.5rem;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
 			}
 
-			.contact-form__input:focus {
-				outline: none;
-				border-color: #2a9fb5;
-				box-shadow: 0 0 0 3px rgba(42, 159, 181, 0.2);
-			}
-
-			.contact-form__textarea {
-				resize: vertical;
-				min-height: 120px;
-			}
-
-			.contact-form__submit {
+			.discover-chania__title {
 				font-family: var(--font-body);
+				font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: #1a1a1a;
+				margin: 0 0 1.5rem;
+				line-height: 1.2;
+			}
+
+			.discover-chania__text {
+				max-width: 420px;
 				font-size: 0.95rem;
+				line-height: 1.65;
+				color: #333;
+				margin: 0 0 2rem;
+			}
+
+			.discover-chania__btn {
+				display: inline-block;
+				padding: 0.75rem 1.75rem;
+				background-color: #f0ebe0;
+				color: #1a1a1a;
+				border: 1px solid #1a1a1a;
+				border-radius: 6px;
+				font-family: var(--font-body);
+				font-size: 0.9rem;
 				font-weight: 600;
-				color: #fff;
-				background: #2a9fb5;
-				border: none;
-				border-radius: 8px;
-				padding: 0.75rem 1.5rem;
-				margin-top: 0.25rem;
-				cursor: pointer;
-				transition: background-color 0.25s ease-out, transform 0.2s ease-out;
+				letter-spacing: 0.05em;
+				text-decoration: none;
+				transition: background-color 0.2s ease, border-color 0.2s ease;
 			}
 
-			.contact-form__submit:hover {
-				background: #1f7a8c;
-				transform: translateY(-1px);
+			.discover-chania__btn:hover {
+				background-color: #e8e2d6;
+				border-color: #333;
 			}
 
-			/* Footer */
+			.discover-chania__media {
+				overflow: hidden;
+				min-height: 320px;
+			}
+
+			.discover-chania__img {
+				width: 100%;
+				height: 100%;
+				display: block;
+				object-fit: cover;
+				min-height: 320px;
+			}
+
+			.discover-chania--reverse .discover-chania__content {
+				order: 2;
+			}
+
+			.discover-chania--reverse .discover-chania__media {
+				order: 1;
+			}
+
+			@media (max-width: 768px) {
+				.discover-chania {
+					grid-template-columns: 1fr;
+				}
+
+				.discover-chania__content {
+					order: 1;
+				}
+
+				.discover-chania__media {
+					order: 2;
+					min-height: 280px;
+				}
+
+				.discover-chania__img {
+					min-height: 280px;
+				}
+
+				.discover-chania--reverse .discover-chania__content {
+					order: 1;
+				}
+
+				.discover-chania--reverse .discover-chania__media {
+					order: 2;
+				}
+			}
+
 			.site-footer {
 				background-color: #1d8299;
 				color: #fff;
@@ -622,27 +511,6 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 			}
 
 			@media (max-width: 900px) {
-				.contact-cards {
-					grid-template-columns: 1fr;
-				}
-
-				.contact-form-wrap__inner {
-					grid-template-columns: 1fr;
-				}
-
-				.contact-map {
-					min-height: 300px;
-				}
-
-				.contact-map iframe {
-					min-height: 300px;
-				}
-
-				.contact-hero {
-					min-height: auto;
-					padding: 0 1rem 3rem;
-				}
-
 				.site-footer__inner {
 					flex-direction: column;
 					gap: 2rem;
@@ -653,13 +521,5 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 				}
 			}
 		</style>
-
-		<script>
-			document.getElementById('contact-form')?.addEventListener('submit', (e) => {
-				e.preventDefault();
-				// Connect to your backend or e.g. Formspree: form action="https://formspree.io/f/YOUR_ID" method="POST"
-				alert('Ευχαριστούμε! Θα επικοινωνήσουμε μαζί σας σύντομα.');
-			});
-		</script>
 	</body>
 </html>
