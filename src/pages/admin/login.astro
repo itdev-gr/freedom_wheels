@@ -1,7 +1,11 @@
 ---
 export const prerender = false;
 const host = Astro.request.headers.get('host') || '';
-const isAdminSubdomain = host.includes('admin.itdevtesting.com') || host.startsWith('localhost');
+const forwardedHost = Astro.request.headers.get('x-forwarded-host') || '';
+const isAdminSubdomain =
+	host.includes('admin.itdevtesting.com') ||
+	forwardedHost.includes('admin.itdevtesting.com') ||
+	host.startsWith('localhost');
 if (!isAdminSubdomain) {
 	return Astro.redirect('https://itdevtesting.com');
 }
