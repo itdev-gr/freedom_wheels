@@ -1,19 +1,5 @@
 ---
 export const prerender = false;
-try {
-	const req = Astro.request;
-	const host = (req?.headers?.get?.('host') ?? '') || '';
-	const forwardedHost = (req?.headers?.get?.('x-forwarded-host') ?? '') || '';
-	const isAdminSubdomain =
-		host.includes('admin.itdevtesting.com') ||
-		forwardedHost.includes('admin.itdevtesting.com') ||
-		host.startsWith('localhost');
-	if (!isAdminSubdomain) {
-		return Astro.redirect('https://itdevtesting.com');
-	}
-} catch {
-	// continue
-}
 import { isAdminAuthenticated } from '../../lib/auth';
 try {
 	if (isAdminAuthenticated(Astro.request)) {

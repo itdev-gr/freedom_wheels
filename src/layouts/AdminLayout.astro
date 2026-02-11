@@ -2,21 +2,10 @@
 export const prerender = false;
 import { isAdminAuthenticated } from '../lib/auth';
 
-const req = Astro.request;
-const host = (req?.headers?.get?.('host') ?? '') || '';
-const forwardedHost = (req?.headers?.get?.('x-forwarded-host') ?? '') || '';
-const isAdminSubdomain =
-	host.includes('admin.itdevtesting.com') ||
-	forwardedHost.includes('admin.itdevtesting.com') ||
-	host.startsWith('localhost');
-if (!isAdminSubdomain) {
-	return Astro.redirect('https://itdevtesting.com');
-}
-
 const isLoginPage = Astro.url.pathname === '/admin/login' || Astro.url.pathname === '/admin/login/';
 if (!isLoginPage) {
 	try {
-		if (!isAdminAuthenticated(req)) {
+		if (!isAdminAuthenticated(Astro.request)) {
 			return Astro.redirect('/admin/login');
 		}
 	} catch {

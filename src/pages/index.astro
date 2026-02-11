@@ -1,17 +1,4 @@
 ---
-export const prerender = false;
-
-try {
-	const req = Astro.request;
-	const host = (req?.headers?.get?.('host') ?? '') || '';
-	const forwardedHost = (req?.headers?.get?.('x-forwarded-host') ?? '') || '';
-	if (host.includes('admin.itdevtesting.com') || forwardedHost.includes('admin.itdevtesting.com')) {
-		return Astro.redirect('/admin');
-	}
-} catch {
-	// continue to main site
-}
-
 const title = 'Freedom Wheels | Rent a Scooter in Chania, Crete';
 const description = 'Rent a scooter in Chania with Freedom Wheels. Explore the old town, harbour and beaches. Well-maintained scooters, helmets included. Book online or contact us.';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
