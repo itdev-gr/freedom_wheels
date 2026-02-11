@@ -2,15 +2,19 @@
 export const prerender = false;
 import { isAdminAuthenticated } from '../lib/auth';
 
-const isLoginPage = Astro.url.pathname === '/admin/login' || Astro.url.pathname === '/admin/login/';
-if (!isLoginPage) {
-	try {
-		if (!isAdminAuthenticated(Astro.request)) {
+let isLoginPage = false;
+let allowRender = true;
+try {
+	isLoginPage = Astro.url.pathname === '/admin/login' || Astro.url.pathname === '/admin/login/';
+	if (!isLoginPage) {
+		const authenticated = isAdminAuthenticated(Astro.request);
+		if (!authenticated) {
 			return Astro.redirect('/admin/login');
 		}
-	} catch {
-		return Astro.redirect('/admin/login');
 	}
+} catch (_err) {
+	// On any error (e.g. env, cookie parse), redirect to login instead of 500
+	return Astro.redirect('/admin/login');
 }
 
 interface Props {

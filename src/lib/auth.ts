@@ -43,7 +43,11 @@ export function getSessionCookie(request: Request): string | null {
 }
 
 export function isAdminAuthenticated(request: Request): boolean {
-	return getSessionCookie(request) === 'ok';
+	try {
+		return getSessionCookie(request) === 'ok';
+	} catch {
+		return false;
+	}
 }
 
 export function createSessionCookie(): string {
