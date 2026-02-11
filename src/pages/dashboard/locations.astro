@@ -5,6 +5,30 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 <DashboardLayout title="Locations">
 	<h1>Locations</h1>
 	<div class="dash-card">
+		<h2 style="margin-top: 0; font-size: 1.1rem;">Add location</h2>
+		<form id="add-location-form" class="dash-form" style="display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 0.75rem 1rem; align-items: end; max-width: 800px;">
+			<div class="dash-field" style="margin-bottom: 0;">
+				<label for="new-slug">Slug (ID)</label>
+				<input type="text" id="new-slug" name="slug" placeholder="e.g. chania-airport" required style="max-width: 160px;" />
+			</div>
+			<div class="dash-field" style="margin-bottom: 0;">
+				<label for="new-label">Label</label>
+				<input type="text" id="new-label" name="label" placeholder="Display name" required style="max-width: 240px;" />
+			</div>
+			<div class="dash-field" style="margin-bottom: 0;">
+				<label for="new-sort">Sort</label>
+				<input type="number" id="new-sort" name="sort_order" value="0" style="width: 60px;" />
+			</div>
+			<div class="dash-field" style="margin-bottom: 0;">
+				<label for="new-price">Price (€)</label>
+				<input type="number" id="new-price" name="price_eur" step="0.01" min="0" value="0" placeholder="0" style="width: 80px;" />
+			</div>
+			<button type="submit" class="dash-btn">Add</button>
+		</form>
+		<p id="add-msg" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></p>
+	</div>
+	<div class="dash-card">
+		<h2 style="margin-top: 0; font-size: 1.1rem;">Edit locations</h2>
 		<p>Pick up and return locations. Set label, sort order, and price (€) for using this location.</p>
 		<table class="dash-table" id="locations-table">
 			<thead>
@@ -23,25 +47,41 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 		<p id="locations-msg" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;"></p>
 	</div>
 	<script>
-		(async () => {
+		/** @param {string} [s] */
+		function escapeAttr(s) {
+			return (s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		}
+		async function loadLocations() {
 			const tbody = document.getElementById('locations-tbody');
-			const msg = document.getElementById('locations-msg');
+			if (!tbody) return;
 			const res = await fetch('/api/locations', { credentials: 'include' });
 			if (!res.ok) {
 				tbody.innerHTML = '<tr><td colspan="5">Failed to load locations.</td></tr>';
 				return;
 			}
 			const locations = await res.json();
-			tbody.innerHTML = locations.map((loc: { id: string; slug: string; label: string; sort_order: number; price_eur: number | null }) => `
-				<tr data-id="${loc.id}">
-					<td>${loc.id}</td>
-					<td><input type="text" value="${(loc.label ?? '').replace(/"/g, '&quot;')}" data-label style="max-width: 240px;" /></td>
+			if (locations.length === 0) {
+				tbody.innerHTML = '<tr><td colspan="5">No locations. Add one above.</td></tr>';
+				return;
+			}
+			tbody.innerHTML = locations.map((/** @type {{ id: string; label?: string; sort_order?: number; price_eur?: number|null }} */ loc) => `
+				<tr data-id="${escapeAttr(loc.id)}">
+					<td>${escapeAttr(loc.id)}</td>
+					<td><input type="text" value="${escapeAttr(loc.label ?? '')}" data-label style="max-width: 240px;" /></td>
 					<td><input type="number" value="${loc.sort_order ?? 0}" data-sort style="width: 60px;" /></td>
 					<td><input type="number" step="0.01" min="0" value="${loc.price_eur ?? ''}" data-price style="width: 80px;" placeholder="0" /></td>
-					<td><button type="button" class="dash-btn save-btn">Save</button></td>
+					<td>
+						<button type="button" class="dash-btn save-btn">Save</button>
+						<button type="button" class="dash-btn dash-btn--danger delete-btn" style="margin-left: 0.25rem;">Delete</button>
+					</td>
 				</tr>
 			`).join('');
-
+			bindRowActions();
+		}
+		function bindRowActions() {
+			const tbody = document.getElementById('locations-tbody');
+			const msg = document.getElementById('locations-msg');
+			if (!tbody) return;
 			tbody.querySelectorAll('.save-btn').forEach((btn) => {
 				btn.addEventListener('click', async () => {
 					const row = (btn as HTMLElement).closest('tr');
@@ -51,16 +91,68 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 					const sort = parseInt((row.querySelector('[data-sort]') as HTMLInputElement)?.value ?? '0', 10) || 0;
 					const priceRaw = (row.querySelector('[data-price]') as HTMLInputElement)?.value?.trim();
 					const price_eur = priceRaw === '' ? null : parseFloat(priceRaw) || 0;
-					msg.textContent = '';
+					if (msg) msg.textContent = '';
 					const putRes = await fetch('/api/locations', {
 						method: 'PUT',
 						headers: { 'Content-Type': 'application/json' },
 						credentials: 'include',
 						body: JSON.stringify({ id, slug: id, label, sort_order: sort, price_eur }),
 					});
-					if (putRes.ok) msg.textContent = 'Saved.';
-					else msg.textContent = 'Failed to save.';
+					if (msg) msg.textContent = putRes.ok ? 'Saved.' : 'Failed to save.';
 				});
+			});
+			tbody.querySelectorAll('.delete-btn').forEach((btn) => {
+				btn.addEventListener('click', async () => {
+					const row = (btn as HTMLElement).closest('tr');
+					if (!row) return;
+					const id = row.getAttribute('data-id');
+					if (!id || !confirm(`Delete location "${id}"?`)) return;
+					if (msg) msg.textContent = '';
+					const delRes = await fetch(`/api/locations?id=${encodeURIComponent(id)}`, {
+						method: 'DELETE',
+						credentials: 'include',
+					});
+					if (delRes.ok) {
+						if (msg) msg.textContent = 'Deleted.';
+						row.remove();
+						if (tbody.querySelectorAll('tr').length === 0) tbody.innerHTML = '<tr><td colspan="5">No locations. Add one above.</td></tr>';
+					} else {
+						const data = await delRes.json().catch(() => ({}));
+						if (msg) msg.textContent = data.error || 'Failed to delete.';
+					}
+				});
+			});
+		}
+		(async () => {
+			await loadLocations();
+			const addForm = document.getElementById('add-location-form');
+			const addMsg = document.getElementById('add-msg');
+			if (!addForm) return;
+			addForm.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				if (addMsg) addMsg.textContent = '';
+				const slug = (document.getElementById('new-slug') as HTMLInputElement)?.value?.trim() ?? '';
+				const label = (document.getElementById('new-label') as HTMLInputElement)?.value?.trim() ?? '';
+				const sort = parseInt((document.getElementById('new-sort') as HTMLInputElement)?.value ?? '0', 10) || 0;
+				const priceRaw = (document.getElementById('new-price') as HTMLInputElement)?.value?.trim();
+				const price_eur = priceRaw === '' ? 0 : parseFloat(priceRaw) || 0;
+				if (!slug) { if (addMsg) addMsg.textContent = 'Slug is required.'; return; }
+				const postRes = await fetch('/api/locations', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify({ slug, label, sort_order: sort, price_eur }),
+				});
+				const data = await postRes.json().catch(() => ({}));
+				if (postRes.ok) {
+					if (addMsg) addMsg.textContent = 'Location added.';
+					(addForm as HTMLFormElement).reset();
+					(document.getElementById('new-sort') as HTMLInputElement).value = '0';
+					(document.getElementById('new-price') as HTMLInputElement).value = '0';
+					await loadLocations();
+				} else {
+					if (addMsg) addMsg.textContent = data.error || 'Failed to add.';
+				}
 			});
 		})();
 	</script>

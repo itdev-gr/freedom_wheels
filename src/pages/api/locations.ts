@@ -62,3 +62,43 @@ export const PUT: APIRoute = async ({ request }) => {
 		return json({ error: 'Failed to update locations' }, 500);
 	}
 };
+
+export const POST: APIRoute = async ({ request }) => {
+	const session = await verifySession(request);
+	if (!session) return json({ error: 'Unauthorized' }, 401);
+	const db = getDb();
+	if (!db) return json({ error: 'Database not configured' }, 503);
+	try {
+		const body = (await request.json()) as { slug?: string; label?: string; sort_order?: number; price_eur?: number };
+		const slug = String(body.slug ?? '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || null;
+		if (!slug) return json({ error: 'slug required' }, 400);
+		const label = String(body.label ?? '').trim();
+		const sortOrder = Number(body.sort_order) ?? 0;
+		const priceEur = body.price_eur === null || body.price_eur === '' ? null : Number(body.price_eur) || 0;
+		const ref = db.collection('locations').doc(slug);
+		const snap = await ref.get();
+		if (snap.exists) return json({ error: 'Location with this slug already exists' }, 409);
+		await ref.set({ slug, label, sortOrder, priceEur });
+		return json({ ok: true, id: slug });
+	} catch (e) {
+		console.error(e);
+		return json({ error: 'Failed to create location' }, 500);
+	}
+};
+
+export const DELETE: APIRoute = async ({ request }) => {
+	const session = await verifySession(request);
+	if (!session) return json({ error: 'Unauthorized' }, 401);
+	const db = getDb();
+	if (!db) return json({ error: 'Database not configured' }, 503);
+	const url = new URL(request.url);
+	const id = url.searchParams.get('id')?.trim();
+	if (!id) return json({ error: 'id required' }, 400);
+	try {
+		await db.collection('locations').doc(id).delete();
+		return json({ ok: true });
+	} catch (e) {
+		console.error(e);
+		return json({ error: 'Failed to delete location' }, 500);
+	}
+};
