@@ -29,13 +29,17 @@ function unsign(signed: string): string | null {
 }
 
 export function getSessionCookie(request: Request): string | null {
-	const cookieHeader = request.headers.get('cookie');
-	if (!cookieHeader) return null;
-	const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
-	if (!match) return null;
-	const value = decodeURIComponent(match[1].trim());
-	const decoded = unsign(value);
-	return decoded === 'ok' ? 'ok' : null;
+	try {
+		const cookieHeader = request.headers.get('cookie');
+		if (!cookieHeader) return null;
+		const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
+		if (!match) return null;
+		const value = decodeURIComponent(match[1].trim());
+		const decoded = unsign(value);
+		return decoded === 'ok' ? 'ok' : null;
+	} catch {
+		return null;
+	}
 }
 
 export function isAdminAuthenticated(request: Request): boolean {

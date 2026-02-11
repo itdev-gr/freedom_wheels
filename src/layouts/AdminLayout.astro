@@ -2,8 +2,9 @@
 export const prerender = false;
 import { isAdminAuthenticated } from '../lib/auth';
 
-const host = Astro.request.headers.get('host') || '';
-const forwardedHost = Astro.request.headers.get('x-forwarded-host') || '';
+const req = Astro.request;
+const host = (req?.headers?.get?.('host') ?? '') || '';
+const forwardedHost = (req?.headers?.get?.('x-forwarded-host') ?? '') || '';
 const isAdminSubdomain =
 	host.includes('admin.itdevtesting.com') ||
 	forwardedHost.includes('admin.itdevtesting.com') ||
@@ -13,8 +14,14 @@ if (!isAdminSubdomain) {
 }
 
 const isLoginPage = Astro.url.pathname === '/admin/login' || Astro.url.pathname === '/admin/login/';
-if (!isLoginPage && !isAdminAuthenticated(Astro.request)) {
-	return Astro.redirect('/admin/login');
+if (!isLoginPage) {
+	try {
+		if (!isAdminAuthenticated(req)) {
+			return Astro.redirect('/admin/login');
+		}
+	} catch {
+		return Astro.redirect('/admin/login');
+	}
 }
 
 interface Props {

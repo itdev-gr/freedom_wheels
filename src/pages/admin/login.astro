@@ -1,18 +1,26 @@
 ---
 export const prerender = false;
-const host = Astro.request.headers.get('host') || '';
-const forwardedHost = Astro.request.headers.get('x-forwarded-host') || '';
-const isAdminSubdomain =
-	host.includes('admin.itdevtesting.com') ||
-	forwardedHost.includes('admin.itdevtesting.com') ||
-	host.startsWith('localhost');
-if (!isAdminSubdomain) {
-	return Astro.redirect('https://itdevtesting.com');
+try {
+	const req = Astro.request;
+	const host = (req?.headers?.get?.('host') ?? '') || '';
+	const forwardedHost = (req?.headers?.get?.('x-forwarded-host') ?? '') || '';
+	const isAdminSubdomain =
+		host.includes('admin.itdevtesting.com') ||
+		forwardedHost.includes('admin.itdevtesting.com') ||
+		host.startsWith('localhost');
+	if (!isAdminSubdomain) {
+		return Astro.redirect('https://itdevtesting.com');
+	}
+} catch {
+	// continue
 }
-// If already logged in, redirect to admin
 import { isAdminAuthenticated } from '../../lib/auth';
-if (isAdminAuthenticated(Astro.request)) {
-	return Astro.redirect('/admin');
+try {
+	if (isAdminAuthenticated(Astro.request)) {
+		return Astro.redirect('/admin');
+	}
+} catch {
+	// show login
 }
 ---
 <html lang="en">
