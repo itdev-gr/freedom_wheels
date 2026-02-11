@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
-import { isAdminAuthenticated } from '../../lib/auth';
+import { verifySession } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -18,7 +18,13 @@ export const GET: APIRoute = async () => {
 		const snap = await db.collection('locations').orderBy('sortOrder').get();
 		const locations = snap.docs.map((d) => {
 			const data = d.data();
-			return { id: d.id, slug: data.slug, label: data.label, sort_order: data.sortOrder };
+			return {
+				id: d.id,
+				slug: data.slug,
+				label: data.label,
+				sort_order: data.sortOrder,
+				price_eur: data.priceEur != null ? data.priceEur : null,
+			};
 		});
 		return json(locations);
 	} catch (e) {
@@ -27,58 +33,32 @@ export const GET: APIRoute = async () => {
 	}
 };
 
-export const POST: APIRoute = async ({ request }) => {
-	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
-	try {
-		const body = await request.json() as { slug?: string; label?: string; sort_order?: number };
-		const slug = String(body.slug ?? '').trim();
-		const label = String(body.label ?? '').trim();
-		const sortOrder = Number(body.sort_order) || 0;
-		if (!slug) return json({ error: 'slug required' }, 400);
-		const ref = db.collection('locations').doc(slug);
-		await ref.set({ slug, label, sortOrder });
-		return json({ id: slug, slug, label, sort_order: sortOrder });
-	} catch (e) {
-		console.error(e);
-		return json({ error: 'Failed to create location' }, 500);
-	}
-};
-
 export const PUT: APIRoute = async ({ request }) => {
-	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
+	const session = await verifySession(request);
+	if (!session) return json({ error: 'Unauthorized' }, 401);
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
-		const body = await request.json() as { id?: string; slug?: string; label?: string; sort_order?: number };
-		const id = String(body.id ?? body.slug ?? '').trim();
-		if (!id) return json({ error: 'id or slug required' }, 400);
-		const ref = db.collection('locations').doc(id);
-		const update: Record<string, unknown> = {};
-		if (body.slug !== undefined) update.slug = String(body.slug).trim();
-		if (body.label !== undefined) update.label = String(body.label).trim();
-		if (body.sort_order !== undefined) update.sortOrder = Number(body.sort_order);
-		await ref.update(update);
+		const body = (await request.json()) as
+			| { id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }
+			| { items?: Array<{ id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }> };
+		const items = Array.isArray((body as { items?: unknown }).items)
+			? (body as { items: Array<{ id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }> }).items
+			: [body as { id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }];
+		for (const item of items) {
+			const id = String(item.id ?? item.slug ?? '').trim();
+			if (!id) continue;
+			const ref = db.collection('locations').doc(id);
+			const update: Record<string, unknown> = {};
+			if (item.slug !== undefined) update.slug = String(item.slug).trim();
+			if (item.label !== undefined) update.label = String(item.label).trim();
+			if (item.sort_order !== undefined) update.sortOrder = Number(item.sort_order);
+			if (item.price_eur !== undefined) update.priceEur = item.price_eur === null || item.price_eur === '' ? null : Number(item.price_eur);
+			if (Object.keys(update).length > 0) await ref.set(update, { merge: true });
+		}
 		return json({ ok: true });
 	} catch (e) {
 		console.error(e);
-		return json({ error: 'Failed to update location' }, 500);
-	}
-};
-
-export const DELETE: APIRoute = async ({ request }) => {
-	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
-	const url = new URL(request.url);
-	const id = url.searchParams.get('id')?.trim();
-	if (!id) return json({ error: 'id required' }, 400);
-	try {
-		await db.collection('locations').doc(id).delete();
-		return json({ ok: true });
-	} catch (e) {
-		console.error(e);
-		return json({ error: 'Failed to delete location' }, 500);
+		return json({ error: 'Failed to update locations' }, 500);
 	}
 };

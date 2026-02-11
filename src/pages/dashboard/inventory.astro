@@ -1,0 +1,61 @@
+---
+export const prerender = false;
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+<DashboardLayout title="Inventory">
+	<h1>Inventory</h1>
+	<div class="dash-card">
+		<p>Set how many of each scooter you have in stock.</p>
+		<table class="dash-table" id="inventory-table">
+			<thead>
+				<tr>
+					<th>Scooter</th>
+					<th>Quantity</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="inventory-tbody">
+				<tr><td colspan="3">Loading…</td></tr>
+			</tbody>
+		</table>
+		<p id="inventory-msg" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;"></p>
+	</div>
+	<script>
+		(async () => {
+			const tbody = document.getElementById('inventory-tbody');
+			const msg = document.getElementById('inventory-msg');
+			const res = await fetch('/api/scooters', { credentials: 'include' });
+			if (!res.ok) {
+				tbody.innerHTML = '<tr><td colspan="3">Failed to load scooters.</td></tr>';
+				return;
+			}
+			const scooters = await res.json();
+			tbody.innerHTML = scooters.map((s: { id: string; label: string; quantity: number }) => `
+				<tr data-id="${s.id}">
+					<td>${s.label}</td>
+					<td><input type="number" min="0" value="${s.quantity}" data-quantity style="width: 80px;" /></td>
+					<td><button type="button" class="dash-btn save-btn">Save</button></td>
+				</tr>
+			`).join('');
+
+			tbody.querySelectorAll('.save-btn').forEach((btn) => {
+				btn.addEventListener('click', async () => {
+					const row = (btn as HTMLElement).closest('tr');
+					if (!row) return;
+					const id = row.getAttribute('data-id');
+					const input = row.querySelector('[data-quantity]') as HTMLInputElement;
+					const quantity = parseInt(input?.value ?? '0', 10) || 0;
+					msg.textContent = '';
+					const putRes = await fetch('/api/scooters', {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						credentials: 'include',
+						body: JSON.stringify({ id, quantity }),
+					});
+					if (putRes.ok) msg.textContent = 'Saved.';
+					else msg.textContent = 'Failed to save.';
+				});
+			});
+		})();
+	</script>
+</DashboardLayout>

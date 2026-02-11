@@ -1,0 +1,109 @@
+---
+export const prerender = false;
+const title = 'Login | Freedom Wheels';
+const description = 'Sign in to the Freedom Wheels dashboard.';
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<link rel="icon" type="image/webp" href="/logos/logo.webp" />
+		<title>{title}</title>
+		<style is:global>
+			.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f5f5f5; font-family: system-ui, sans-serif; }
+			.login-card { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); width: 100%; max-width: 360px; }
+			.login-card h1 { margin: 0 0 1.5rem; font-size: 1.5rem; color: #222; }
+			.login-card .logo { display: block; margin-bottom: 1.5rem; }
+			.login-card .logo img { height: 40px; width: auto; }
+			.login-field { margin-bottom: 1rem; }
+			.login-field label { display: block; margin-bottom: 0.35rem; font-size: 0.9rem; color: #444; }
+			.login-field input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+			.login-field input:focus { outline: none; border-color: #1a73e8; }
+			.login-actions { margin-top: 1.5rem; }
+			.login-actions button { width: 100%; padding: 0.75rem; background: #1a73e8; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+			.login-actions button:hover { background: #1557b0; }
+			.login-actions button:disabled { opacity: 0.7; cursor: not-allowed; }
+			.login-error { margin-top: 1rem; padding: 0.5rem; background: #fee; color: #c00; border-radius: 4px; font-size: 0.9rem; display: none; }
+			.login-error.visible { display: block; }
+		</style>
+	</head>
+	<body>
+		<main class="login-page">
+			<div class="login-card">
+				<a href="/" class="logo"><img src="/logos/logo.webp" alt="Freedom Wheels" /></a>
+				<h1>Dashboard login</h1>
+				<form id="login-form">
+					<div class="login-field">
+						<label for="email">Email</label>
+						<input type="email" id="email" name="email" required autocomplete="email" />
+					</div>
+					<div class="login-field">
+						<label for="password">Password</label>
+						<input type="password" id="password" name="password" required autocomplete="current-password" />
+					</div>
+					<div id="login-error" class="login-error" aria-live="polite"></div>
+					<div class="login-actions">
+						<button type="submit" id="submit-btn">Sign in</button>
+					</div>
+				</form>
+			</div>
+		</main>
+		<script>
+			import { initializeApp } from 'firebase/app';
+			import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+
+			const apiKey = import.meta.env.PUBLIC_FIREBASE_API_KEY;
+			const authDomain = import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN;
+			const projectId = import.meta.env.PUBLIC_FIREBASE_PROJECT_ID;
+			const appId = import.meta.env.PUBLIC_FIREBASE_APP_ID;
+
+			const form = document.getElementById('login-form');
+			const emailEl = document.getElementById('email');
+			const passwordEl = document.getElementById('password');
+			const errorEl = document.getElementById('login-error');
+			const submitBtn = document.getElementById('submit-btn');
+
+			if (!apiKey || !authDomain || !projectId || !appId) {
+				errorEl.textContent = 'Firebase config missing. Set PUBLIC_FIREBASE_* env vars.';
+				errorEl.classList.add('visible');
+			} else {
+				initializeApp({ apiKey, authDomain, projectId, appId });
+				const auth = getAuth();
+
+				form.addEventListener('submit', async (e) => {
+					e.preventDefault();
+					errorEl.classList.remove('visible');
+					errorEl.textContent = '';
+					submitBtn.disabled = true;
+					const email = emailEl.value.trim();
+					const password = passwordEl.value;
+					try {
+						const userCred = await signInWithEmailAndPassword(auth, email, password);
+						const idToken = await userCred.user.getIdToken();
+						const res = await fetch('/api/login', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ idToken }),
+							credentials: 'include',
+						});
+						const data = await res.json().catch(() => ({}));
+						if (!res.ok) {
+							errorEl.textContent = data.error || 'Login failed';
+							errorEl.classList.add('visible');
+							submitBtn.disabled = false;
+							return;
+						}
+						window.location.href = '/dashboard';
+					} catch (err) {
+						errorEl.textContent = err.message || 'Sign in failed';
+						errorEl.classList.add('visible');
+						submitBtn.disabled = false;
+					}
+				});
+			}
+		</script>
+	</body>
+</html>

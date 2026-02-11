@@ -1,0 +1,67 @@
+---
+export const prerender = false;
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+<DashboardLayout title="Locations">
+	<h1>Locations</h1>
+	<div class="dash-card">
+		<p>Pick up and return locations. Set label, sort order, and price (€) for using this location.</p>
+		<table class="dash-table" id="locations-table">
+			<thead>
+				<tr>
+					<th>ID / Slug</th>
+					<th>Label</th>
+					<th>Sort</th>
+					<th>Price (€)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="locations-tbody">
+				<tr><td colspan="5">Loading…</td></tr>
+			</tbody>
+		</table>
+		<p id="locations-msg" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;"></p>
+	</div>
+	<script>
+		(async () => {
+			const tbody = document.getElementById('locations-tbody');
+			const msg = document.getElementById('locations-msg');
+			const res = await fetch('/api/locations', { credentials: 'include' });
+			if (!res.ok) {
+				tbody.innerHTML = '<tr><td colspan="5">Failed to load locations.</td></tr>';
+				return;
+			}
+			const locations = await res.json();
+			tbody.innerHTML = locations.map((loc: { id: string; slug: string; label: string; sort_order: number; price_eur: number | null }) => `
+				<tr data-id="${loc.id}">
+					<td>${loc.id}</td>
+					<td><input type="text" value="${(loc.label ?? '').replace(/"/g, '&quot;')}" data-label style="max-width: 240px;" /></td>
+					<td><input type="number" value="${loc.sort_order ?? 0}" data-sort style="width: 60px;" /></td>
+					<td><input type="number" step="0.01" min="0" value="${loc.price_eur ?? ''}" data-price style="width: 80px;" placeholder="0" /></td>
+					<td><button type="button" class="dash-btn save-btn">Save</button></td>
+				</tr>
+			`).join('');
+
+			tbody.querySelectorAll('.save-btn').forEach((btn) => {
+				btn.addEventListener('click', async () => {
+					const row = (btn as HTMLElement).closest('tr');
+					if (!row) return;
+					const id = row.getAttribute('data-id');
+					const label = (row.querySelector('[data-label]') as HTMLInputElement)?.value?.trim() ?? '';
+					const sort = parseInt((row.querySelector('[data-sort]') as HTMLInputElement)?.value ?? '0', 10) || 0;
+					const priceRaw = (row.querySelector('[data-price]') as HTMLInputElement)?.value?.trim();
+					const price_eur = priceRaw === '' ? null : parseFloat(priceRaw) || 0;
+					msg.textContent = '';
+					const putRes = await fetch('/api/locations', {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						credentials: 'include',
+						body: JSON.stringify({ id, slug: id, label, sort_order: sort, price_eur }),
+					});
+					if (putRes.ok) msg.textContent = 'Saved.';
+					else msg.textContent = 'Failed to save.';
+				});
+			});
+		})();
+	</script>
+</DashboardLayout>

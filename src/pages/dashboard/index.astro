@@ -1,0 +1,16 @@
+---
+export const prerender = false;
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+<DashboardLayout title="Dashboard">
+	<h1>Dashboard</h1>
+	<div class="dash-card">
+		<p>Welcome to the Freedom Wheels dashboard. Use the menu to manage:</p>
+		<ul style="margin: 0.5rem 0 0 1.25rem;">
+			<li><a href="/dashboard/inventory">Inventory</a> – How many of each scooter you have</li>
+			<li><a href="/dashboard/prices">Prices</a> – Prices per day by scooter and season</li>
+			<li><a href="/dashboard/locations">Locations</a> – Pick up / return locations and their price</li>
+			<li><a href="/dashboard/bookings">Bookings</a> – View and create custom bookings</li>
+		</ul>
+	</div>
+</DashboardLayout>

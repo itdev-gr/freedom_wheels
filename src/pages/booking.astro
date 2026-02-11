@@ -15,7 +15,7 @@ const SCOOTERS: Record<string, { image: string; title: string; subtitle: string;
 const modelParam = Astro.url.searchParams.get('model') ?? 'liberty-125';
 const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 
-let locations: Array<{ id: string; slug: string; label: string; sort_order: number }> = [];
+let locations: Array<{ id: string; slug: string; label: string; sort_order: number; price_eur?: number | null }> = [];
 let pricesMatrix: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
 try {
 	const base = Astro.url.origin;
@@ -171,13 +171,13 @@ if (locations.length === 0) {
 							</div>
 							<div class="booking-summary__row booking-summary__row--indent">
 								<span>Locations</span>
-								<span>€0.00</span>
+								<span id="summary-locations">€0.00</span>
 							</div>
 							<div class="booking-summary__row booking-summary__total">
 								<strong>Total price</strong>
 								<strong id="summary-total">—</strong>
 							</div>
-							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" data-model={modelParam} data-prices={JSON.stringify(pricesMatrix)} hidden></div>
+							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" data-model={modelParam} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} hidden></div>
 							<a href={`/contact?model=${modelParam}`} class="booking-cta">Payment upon pickup</a>
 						</div>
 					</div>
@@ -814,11 +814,15 @@ if (locations.length === 0) {
 				const basePrice = Number(data?.getAttribute('data-base-price')) || 0;
 				const model = data?.getAttribute('data-model') || '';
 				let pricesMatrix = [];
+				let locationsList = [];
 				try {
 					const raw = data?.getAttribute('data-prices');
 					if (raw) pricesMatrix = JSON.parse(raw);
+					const locRaw = data?.getAttribute('data-locations');
+					if (locRaw) locationsList = JSON.parse(locRaw);
 				} catch (e) {}
 				const insuranceEl = document.getElementById('summary-insurance');
+				const locationsEl = document.getElementById('summary-locations');
 				const insuranceTotalEl = document.getElementById('summary-insurance-total');
 				const totalEl = document.getElementById('summary-total');
 				const summaryDaysEl = document.getElementById('summary-days');
@@ -890,13 +894,21 @@ if (locations.length === 0) {
 					var value = radio?.value;
 					var perDay = value === 'full' ? fullPrice : basicPrice;
 					var insuranceTotal = perDay * days;
+					var pickupLocId = document.getElementById('pickup-location')?.value || '';
+					var returnLocId = document.getElementById('return-location')?.value || '';
+					var locPrice = 0;
+					locationsList.forEach(function (loc) {
+						if (loc.id === pickupLocId && loc.price_eur != null) locPrice += Number(loc.price_eur);
+						if (loc.id === returnLocId && loc.price_eur != null && returnLocId !== pickupLocId) locPrice += Number(loc.price_eur);
+					});
 					var season = pickupInput?.value ? getSeason(pickupInput.value) : 'high';
 					var cappedDays = Math.min(Math.max(days, 1), 7);
 					var matrixPrice = getPriceFromMatrix(model, season, cappedDays);
 					var baseTotal = !isNaN(matrixPrice) ? matrixPrice : basePrice * days;
-					var total = baseTotal + insuranceTotal;
+					var total = baseTotal + insuranceTotal + locPrice;
 					insuranceEl.textContent = formatEur(perDay);
 					insuranceTotalEl.textContent = formatEur(insuranceTotal);
+					if (locationsEl) locationsEl.textContent = formatEur(locPrice);
 					totalEl.textContent = formatEur(total);
 				}
 
@@ -910,6 +922,8 @@ if (locations.length === 0) {
 				if (returnInput) {
 					returnInput.addEventListener('change', updateSummary);
 				}
+				document.getElementById('pickup-location')?.addEventListener('change', updateSummary);
+				document.getElementById('return-location')?.addEventListener('change', updateSummary);
 				document.querySelectorAll('input[name="insurance"]').forEach(function (input) {
 					input.addEventListener('change', updateSummary);
 				});

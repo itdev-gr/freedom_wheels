@@ -1,0 +1,161 @@
+---
+export const prerender = false;
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+---
+<DashboardLayout title="Bookings">
+	<h1>Bookings</h1>
+	<div class="dash-card">
+		<h2 style="margin-top: 0; font-size: 1.1rem;">New booking</h2>
+		<form id="booking-form" class="dash-form">
+			<div class="dash-field">
+				<label>Customer name</label>
+				<input type="text" name="customerName" required />
+			</div>
+			<div class="dash-field">
+				<label>Email</label>
+				<input type="email" name="email" />
+			</div>
+			<div class="dash-field">
+				<label>Phone</label>
+				<input type="text" name="phone" />
+			</div>
+			<div class="dash-field">
+				<label>Scooter</label>
+				<select name="scooterId">
+					<option value="sh-125">SH 125</option>
+					<option value="liberty-125">LIBERTY 125</option>
+					<option value="sim-200">SIM 200</option>
+					<option value="voge-rally-300">VOGE RALLY 300</option>
+				</select>
+			</div>
+			<div class="dash-field">
+				<label>Pickup date</label>
+				<input type="date" name="pickupDate" required />
+			</div>
+			<div class="dash-field">
+				<label>Return date</label>
+				<input type="date" name="returnDate" required />
+			</div>
+			<div class="dash-field">
+				<label>Pickup location</label>
+				<select name="pickupLocationId" id="pickup-loc"></select>
+			</div>
+			<div class="dash-field">
+				<label>Return location</label>
+				<select name="returnLocationId" id="return-loc"></select>
+			</div>
+			<div class="dash-field">
+				<label>Total (€)</label>
+				<input type="number" name="totalEur" step="0.01" min="0" value="0" />
+			</div>
+			<div class="dash-field">
+				<label>Status</label>
+				<select name="status">
+					<option value="pending">Pending</option>
+					<option value="confirmed">Confirmed</option>
+					<option value="cancelled">Cancelled</option>
+				</select>
+			</div>
+			<div class="dash-field">
+				<label>Notes</label>
+				<textarea name="notes"></textarea>
+			</div>
+			<button type="submit" class="dash-btn">Create booking</button>
+		</form>
+		<p id="booking-form-msg" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;"></p>
+	</div>
+	<div class="dash-card">
+		<h2 style="margin-top: 0; font-size: 1.1rem;">All bookings</h2>
+		<table class="dash-table" id="bookings-table">
+			<thead>
+				<tr>
+					<th>Customer</th>
+					<th>Scooter</th>
+					<th>Pickup</th>
+					<th>Return</th>
+					<th>Total</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+			<tbody id="bookings-tbody">
+				<tr><td colspan="6">Loading…</td></tr>
+			</tbody>
+		</table>
+	</div>
+	<script>
+		function escapeHtml(s) {
+			const div = document.createElement('div');
+			div.textContent = s ?? '';
+			return div.innerHTML;
+		}
+		(async () => {
+			const form = document.getElementById('booking-form');
+			const formMsg = document.getElementById('booking-form-msg');
+			const tbody = document.getElementById('bookings-tbody');
+			const pickupSelect = document.getElementById('pickup-loc');
+			const returnSelect = document.getElementById('return-loc');
+
+			const locRes = await fetch('/api/locations', { credentials: 'include' });
+			const locations = locRes.ok ? await locRes.json() : [];
+			locations.forEach((loc) => {
+				const opt = document.createElement('option');
+				opt.value = loc.id;
+				opt.textContent = loc.label || loc.id;
+				pickupSelect?.appendChild(opt.cloneNode(true));
+				returnSelect?.appendChild(opt);
+			});
+
+			const bookRes = await fetch('/api/bookings', { credentials: 'include' });
+			if (!bookRes.ok) {
+				tbody.innerHTML = '<tr><td colspan="6">Failed to load bookings.</td></tr>';
+			} else {
+				const bookings = await bookRes.json();
+				tbody.innerHTML = bookings.length === 0
+					? '<tr><td colspan="6">No bookings yet.</td></tr>'
+					: bookings.map((b) => `
+						<tr>
+							<td>${escapeHtml(b.customerName ?? '')}</td>
+							<td>${escapeHtml(b.scooterId ?? '')}</td>
+							<td>${escapeHtml(b.pickupDate ?? '')}</td>
+							<td>${escapeHtml(b.returnDate ?? '')}</td>
+							<td>€${Number(b.totalEur ?? 0).toFixed(2)}</td>
+							<td>${escapeHtml(b.status ?? '')}</td>
+						</tr>
+					`).join('');
+			}
+
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				formMsg.textContent = '';
+				const fd = new FormData(form);
+				const body = {
+					customerName: fd.get('customerName'),
+					email: fd.get('email'),
+					phone: fd.get('phone'),
+					scooterId: fd.get('scooterId'),
+					pickupDate: fd.get('pickupDate'),
+					returnDate: fd.get('returnDate'),
+					pickupLocationId: fd.get('pickupLocationId'),
+					returnLocationId: fd.get('returnLocationId'),
+					totalEur: parseFloat(String(fd.get('totalEur') ?? 0)) || 0,
+					status: fd.get('status') || 'pending',
+					notes: fd.get('notes'),
+				};
+				const res = await fetch('/api/bookings', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify(body),
+				});
+				const data = await res.json().catch(() => ({}));
+				if (res.ok) {
+					formMsg.textContent = 'Booking created.';
+					form.reset();
+					window.location.reload();
+				} else {
+					formMsg.textContent = data.error || 'Failed to create booking.';
+				}
+			});
+		})();
+	</script>
+</DashboardLayout>

@@ -1,41 +1,33 @@
 import { getAdminAuth } from './firebase';
 
-const SESSION_COOKIE = 'admin_session';
-const COOKIE_MAX_AGE = 3600; // 1 hour, matches Firebase ID token TTL
+const SESSION_COOKIE = 'fw_session';
 
-function getTokenFromRequest(request: Request): string | null {
+export function getSessionToken(request: Request): string | null {
+	const cookieHeader = request.headers.get('Cookie');
+	if (!cookieHeader) return null;
+	const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]*)`));
+	return match ? decodeURIComponent(match[1].trim()) : null;
+}
+
+export async function verifySession(
+	request: Request
+): Promise<{ uid: string; email: string | null } | null> {
+	const token = getSessionToken(request);
+	if (!token) return null;
+	const auth = getAdminAuth();
+	if (!auth) return null;
 	try {
-		const cookieHeader = request.headers.get('cookie');
-		if (!cookieHeader) return null;
-		const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
-		if (!match) return null;
-		const value = decodeURIComponent(match[1].trim());
-		return value || null;
+		const decoded = await auth.verifyIdToken(token);
+		return { uid: decoded.uid, email: decoded.email ?? null };
 	} catch {
 		return null;
 	}
 }
 
-export async function isAdminAuthenticated(request: Request): Promise<boolean> {
-	try {
-		const token = getTokenFromRequest(request);
-		if (!token) return false;
-		const auth = getAdminAuth();
-		if (!auth) return false;
-		const decoded = await auth.verifyIdToken(token);
-		// Require custom claim admin === true (set via Admin SDK setCustomUserClaims)
-		return decoded.customClaims?.admin === true;
-	} catch {
-		return false;
-	}
+export function setSessionCookieHeader(token: string, maxAgeSeconds = 60 * 60 * 24 * 5): string {
+	return `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}`;
 }
 
-export function setAuthCookie(idToken: string): string {
-	const isProd = import.meta.env.PROD;
-	const secure = isProd ? '; Secure' : '';
-	return `${SESSION_COOKIE}=${encodeURIComponent(idToken)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${COOKIE_MAX_AGE}${secure}`;
-}
-
-export function clearAuthCookie(): string {
-	return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`;
+export function clearSessionCookieHeader(): string {
+	return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
-import { isAdminAuthenticated } from '../../lib/auth';
+import { verifySession } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -44,7 +44,8 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const PUT: APIRoute = async ({ request }) => {
-	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
+	const session = await verifySession(request);
+	if (!session) return json({ error: 'Unauthorized' }, 401);
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
