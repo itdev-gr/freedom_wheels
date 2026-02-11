@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+<AdminLayout title="Dashboard">
+	<div class="admin-card">
+		<h1 style="margin:0 0 1rem">Admin Dashboard</h1>
+		<p>Manage locations and prices for the booking site.</p>
+		<p>
+			<a href="/admin/locations" class="admin-btn">Locations</a>
+			<a href="/admin/prices" class="admin-btn" style="margin-left:0.5rem">Prices</a>
+		</p>
+		<p style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid #eee;">
+			<button type="button" class="admin-btn admin-btn--secondary" id="btn-seed">Seed initial data</button>
+			<span style="margin-left:0.5rem; font-size:0.9rem; color:#666;">Run once after setting up Firebase to load default locations and prices.</span>
+		</p>
+	</div>
+	<script>
+		document.getElementById('btn-seed')?.addEventListener('click', async () => {
+			if (!confirm('Seed locations and prices from defaults? This will merge with existing data.')) return;
+			const res = await fetch('/api/seed', { method: 'POST', credentials: 'include' });
+			const data = await res.json().catch(() => ({}));
+			if (res.ok) alert('Seed complete.');
+			else alert(data.error || 'Seed failed');
+		});
+	</script>
+</AdminLayout>

@@ -1,27 +1,60 @@
 ---
 export const prerender = false;
-import AdminLayout from '../../layouts/AdminLayout.astro';
+import { isAdminAuthenticated } from '../../lib/auth';
+try {
+	if (isAdminAuthenticated(Astro.request)) {
+		return Astro.redirect('/admin/dashboard');
+	}
+} catch {
+	// show login
+}
 ---
-<AdminLayout title="Dashboard">
-	<div class="admin-card">
-		<h1 style="margin:0 0 1rem">Admin Dashboard</h1>
-		<p>Manage locations and prices for the booking site.</p>
-		<p>
-			<a href="/admin/locations" class="admin-btn">Locations</a>
-			<a href="/admin/prices" class="admin-btn" style="margin-left:0.5rem">Prices</a>
-		</p>
-		<p style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid #eee;">
-			<button type="button" class="admin-btn admin-btn--secondary" id="btn-seed">Seed initial data</button>
-			<span style="margin-left:0.5rem; font-size:0.9rem; color:#666;">Run once after setting up Firebase to load default locations and prices.</span>
-		</p>
-	</div>
-	<script>
-		document.getElementById('btn-seed')?.addEventListener('click', async () => {
-			if (!confirm('Seed locations and prices from defaults? This will merge with existing data.')) return;
-			const res = await fetch('/api/seed', { method: 'POST', credentials: 'include' });
-			const data = await res.json().catch(() => ({}));
-			if (res.ok) alert('Seed complete.');
-			else alert(data.error || 'Seed failed');
-		});
-	</script>
-</AdminLayout>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Admin Login</title>
+		<style>
+			* { box-sizing: border-box; }
+			body { font-family: system-ui, sans-serif; margin: 0; background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+			.card { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); width: 100%; max-width: 320px; }
+			h1 { margin: 0 0 1.5rem; font-size: 1.25rem; color: #1d8299; }
+			label { display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.9rem; }
+			input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; margin-bottom: 1rem; }
+			button { width: 100%; padding: 0.6rem; background: #1d8299; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+			button:hover { background: #176f82; }
+			.error { color: #c53030; font-size: 0.9rem; margin-top: 0.5rem; }
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<h1>Admin Login</h1>
+			<form id="login-form">
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" required autocomplete="current-password" />
+				<div id="error" class="error" aria-live="polite"></div>
+				<button type="submit">Log in</button>
+			</form>
+		</div>
+		<script>
+			document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const password = (document.getElementById('password') as HTMLInputElement).value;
+				const errEl = document.getElementById('error');
+				if (errEl) errEl.textContent = '';
+				const res = await fetch('/api/admin-login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ password }),
+					credentials: 'include',
+				});
+				if (res.ok) {
+					window.location.href = '/admin/dashboard';
+				} else {
+					const data = await res.json().catch(() => ({}));
+					if (errEl) errEl.textContent = data.error || 'Login failed';
+				}
+			});
+		</script>
+	</body>
+</html>
