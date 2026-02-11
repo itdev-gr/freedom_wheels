@@ -1,0 +1,122 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const apiBase = Astro.url.origin;
+let prices: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
+try {
+	const r = await fetch(`${apiBase}/api/prices`);
+	if (r.ok) prices = await r.json();
+} catch {
+	// ignore
+}
+
+const SCOOTERS = [
+	{ id: 'sh-125', label: 'SH 125cc' },
+	{ id: 'liberty-125', label: 'LIBERTY 125cc' },
+	{ id: 'sim-200', label: 'SIM 200cc' },
+	{ id: 'voge-rally-300', label: 'VOGE RALLY 300cc' },
+];
+
+function getPrice(ps: typeof prices, scooterId: string, season: string, days: number): number | undefined {
+	const row = ps.find((p) => p.scooter_id === scooterId && p.season === season && p.days === days);
+	return row?.price_eur;
+}
+---
+<AdminLayout title="Prices">
+	<div class="admin-card">
+		<h1 style="margin:0 0 1rem">Rental prices</h1>
+		<p style="margin:0 0 1rem">Edit prices per scooter, season and number of days (1–7). High season: 15/6–30/9, Low: 1/10–14/6.</p>
+		<button type="button" class="admin-btn" id="btn-save-prices">Save all changes</button>
+	</div>
+
+	<div class="admin-card">
+		<h2 style="margin:0 0 0.75rem; color:#1d8299">High season (15/6 – 30/9)</h2>
+		<table class="prices-table">
+			<thead>
+				<tr>
+					<th>Model</th>
+					<th>1 day</th>
+					<th>2</th>
+					<th>3</th>
+					<th>4</th>
+					<th>5</th>
+					<th>6</th>
+					<th>7</th>
+				</tr>
+			</thead>
+			<tbody>
+				{SCOOTERS.map((s) => (
+					<tr>
+						<td>{s.label}</td>
+						{[1, 2, 3, 4, 5, 6, 7].map((d) => {
+							const val = getPrice(prices, s.id, 'high', d);
+							return (
+								<td>
+									<input type="number" class="cell-input" min="0" step="1" data-scooter={s.id} data-season="high" data-days={d} value={val ?? ''} />
+								</td>
+							);
+						})}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="admin-card">
+		<h2 style="margin:0 0 0.75rem; color:#1d8299">Low season (1/10 – 14/6)</h2>
+		<table class="prices-table">
+			<thead>
+				<tr>
+					<th>Model</th>
+					<th>1 day</th>
+					<th>2</th>
+					<th>3</th>
+					<th>4</th>
+					<th>5</th>
+					<th>6</th>
+					<th>7</th>
+				</tr>
+			</thead>
+			<tbody>
+				{SCOOTERS.map((s) => (
+					<tr>
+						<td>{s.label}</td>
+						{[1, 2, 3, 4, 5, 6, 7].map((d) => {
+							const val = getPrice(prices, s.id, 'low', d);
+							return (
+								<td>
+									<input type="number" class="cell-input" min="0" step="1" data-scooter={s.id} data-season="low" data-days={d} value={val ?? ''} />
+								</td>
+							);
+						})}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+
+	<script define:vars={{ apiBase }}>
+		document.getElementById('btn-save-prices')?.addEventListener('click', async () => {
+			const inputs = document.querySelectorAll('.cell-input');
+			const items = [];
+			for (const el of inputs) {
+				const scooterId = el.dataset.scooter;
+				const season = el.dataset.season;
+				const days = parseInt(el.dataset.days ?? '0', 10);
+				const priceEur = parseInt((el as HTMLInputElement).value, 10);
+				if (scooterId && season && days && !isNaN(priceEur)) {
+					items.push({ scooter_id: scooterId, season, days, price_eur: priceEur });
+				}
+			}
+			const res = await fetch(`${apiBase}/api/prices`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify(items),
+			});
+			if (res.ok) alert('Prices saved.');
+			else alert((await res.json()).error || 'Save failed');
+		});
+	</script>
+</AdminLayout>

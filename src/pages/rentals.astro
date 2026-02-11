@@ -1,8 +1,53 @@
 ---
+export const prerender = false;
+
 const title = 'Rentals | Freedom Wheels – Scooter Rental Chania';
 const description = 'Rent a scooter in Chania with Freedom Wheels. Well-maintained scooters for exploring the old town, harbour and coast. Helmets included. Contact us for rates and availability.';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/logos/logo.webp', Astro.site).href;
+
+let prices: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
+try {
+	const base = Astro.url.origin;
+	const r = await fetch(`${base}/api/prices`);
+	if (r.ok) prices = await r.json();
+} catch {
+	// fallback below
+}
+
+const SCOOTER_ROWS = [
+	{ id: 'liberty-125', label: 'LIBERTY 125cc' },
+	{ id: 'sh-125', label: 'SH 125cc' },
+	{ id: 'sim-200', label: 'SIM 200cc' },
+	{ id: 'voge-rally-300', label: 'VOGE RALLY 300cc' },
+];
+
+function getPrice(season: string, scooterId: string, days: number): number {
+	const row = prices.find((p) => p.scooter_id === scooterId && p.season === season && p.days === days);
+	return row?.price_eur ?? 0;
+}
+
+// Fallback when API has no data
+const HIGH_FALLBACK: Record<string, number[]> = {
+	'liberty-125': [35, 66, 93, 116, 135, 150, 161],
+	'sh-125': [35, 66, 93, 116, 135, 150, 161],
+	'sim-200': [45, 86, 123, 156, 185, 210, 231],
+	'voge-rally-300': [55, 106, 153, 196, 235, 270, 301],
+};
+const LOW_FALLBACK: Record<string, number[]> = {
+	'liberty-125': [25, 46, 63, 76, 85, 90, 105],
+	'sh-125': [25, 46, 63, 76, 85, 90, 105],
+	'sim-200': [35, 66, 93, 116, 135, 150, 161],
+	'voge-rally-300': [45, 86, 123, 156, 185, 210, 231],
+};
+
+function getPriceOrFallback(season: string, scooterId: string, dayIndex: number): number {
+	const days = dayIndex + 1;
+	const p = getPrice(season, scooterId, days);
+	if (p > 0) return p;
+	const fallback = season === 'high' ? HIGH_FALLBACK : LOW_FALLBACK;
+	return fallback[scooterId]?.[dayIndex] ?? 0;
+}
 ---
 <html lang="en">
 	<head>
@@ -96,10 +141,14 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 										</tr>
 									</thead>
 									<tbody>
-										<tr><td>LIBERTY 125cc</td><td>35</td><td>66</td><td>93</td><td>116</td><td>135</td><td>150</td><td>161</td></tr>
-										<tr><td>SH 125cc</td><td>35</td><td>66</td><td>93</td><td>116</td><td>135</td><td>150</td><td>161</td></tr>
-										<tr><td>SIM 200cc</td><td>45</td><td>86</td><td>123</td><td>156</td><td>185</td><td>210</td><td>231</td></tr>
-										<tr><td>VOGE RALLY 300cc</td><td>55</td><td>106</td><td>153</td><td>196</td><td>235</td><td>270</td><td>301</td></tr>
+										{SCOOTER_ROWS.map((s) => (
+											<tr>
+												<td>{s.label}</td>
+												{[0, 1, 2, 3, 4, 5, 6].map((i) => (
+													<td>{getPriceOrFallback('high', s.id, i)}</td>
+												))}
+											</tr>
+										))}
 									</tbody>
 								</table>
 							</div>
@@ -122,10 +171,14 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 										</tr>
 									</thead>
 									<tbody>
-										<tr><td>LIBERTY 125cc</td><td>25</td><td>46</td><td>63</td><td>76</td><td>85</td><td>90</td><td>105</td></tr>
-										<tr><td>SH 125cc</td><td>25</td><td>46</td><td>63</td><td>76</td><td>85</td><td>90</td><td>105</td></tr>
-										<tr><td>SIM 200cc</td><td>35</td><td>66</td><td>93</td><td>116</td><td>135</td><td>150</td><td>161</td></tr>
-										<tr><td>VOGE RALLY 300cc</td><td>45</td><td>86</td><td>123</td><td>156</td><td>185</td><td>210</td><td>231</td></tr>
+										{SCOOTER_ROWS.map((s) => (
+											<tr>
+												<td>{s.label}</td>
+												{[0, 1, 2, 3, 4, 5, 6].map((i) => (
+													<td>{getPriceOrFallback('low', s.id, i)}</td>
+												))}
+											</tr>
+										))}
 									</tbody>
 								</table>
 							</div>
@@ -234,8 +287,8 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 				margin-bottom: 1.5rem;
 				border-radius: 0;
 				overflow: hidden;
-				height: 90vh;
-				max-height: 90vh;
+				height: 76.5vh;
+				max-height: 76.5vh;
 			}
 
 			.rentals-flyer__hero img {

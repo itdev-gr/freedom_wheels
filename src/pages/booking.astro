@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 const title = 'Request a booking | Freedom Wheels – Scooter Rental Chania';
 const description = 'Send your scooter rental booking request to Freedom Wheels in Chania. We\'ll confirm availability and price by email or phone.';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -12,6 +14,28 @@ const SCOOTERS: Record<string, { image: string; title: string; subtitle: string;
 };
 const modelParam = Astro.url.searchParams.get('model') ?? 'liberty-125';
 const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
+
+let locations: Array<{ id: string; slug: string; label: string; sort_order: number }> = [];
+let pricesMatrix: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
+try {
+	const base = Astro.url.origin;
+	const [locRes, priceRes] = await Promise.all([
+		fetch(`${base}/api/locations`),
+		fetch(`${base}/api/prices`),
+	]);
+	if (locRes.ok) locations = await locRes.json();
+	if (priceRes.ok) pricesMatrix = await priceRes.json();
+} catch {
+	// fallback to hardcoded below
+}
+if (locations.length === 0) {
+	locations = [
+		{ id: 'chania-store', slug: 'chania-store', label: 'Chania – Freedom Wheels (7 Apokoronou Str)', sort_order: 0 },
+		{ id: 'chania-port', slug: 'chania-port', label: 'Chania – Port', sort_order: 1 },
+		{ id: 'chania-airport', slug: 'chania-airport', label: 'Chania – Airport', sort_order: 2 },
+		{ id: 'other', slug: 'other', label: 'Other (specify in contact)', sort_order: 3 },
+	];
+}
 ---
 <html lang="en">
 	<head>
@@ -94,20 +118,18 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 								<label for="pickup-location">Pick-up location</label>
 								<select id="pickup-location" name="pickup-location" class="booking-select">
 									<option value="">Select location</option>
-									<option value="chania-store">Chania – Freedom Wheels (7 Apokoronou Str)</option>
-									<option value="chania-port">Chania – Port</option>
-									<option value="chania-airport">Chania – Airport</option>
-									<option value="other">Other (specify in contact)</option>
+									{locations.map((loc) => (
+										<option value={loc.slug}>{loc.label}</option>
+									))}
 								</select>
 							</div>
 							<div class="booking-date-row">
 								<label for="return-location">Return location</label>
 								<select id="return-location" name="return-location" class="booking-select">
 									<option value="">Select location</option>
-									<option value="chania-store">Chania – Freedom Wheels (7 Apokoronou Str)</option>
-									<option value="chania-port">Chania – Port</option>
-									<option value="chania-airport">Chania – Airport</option>
-									<option value="other">Other (specify in contact)</option>
+									{locations.map((loc) => (
+										<option value={loc.slug}>{loc.label}</option>
+									))}
 								</select>
 							</div>
 						</div>
@@ -156,7 +178,7 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 								<strong>Total price</strong>
 								<strong id="summary-total">—</strong>
 							</div>
-							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" hidden></div>
+							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" data-model={modelParam} data-prices={JSON.stringify(pricesMatrix)} hidden></div>
 							<a href={`/contact?model=${modelParam}`} class="booking-cta">Payment upon pickup</a>
 						</div>
 					</div>
@@ -791,6 +813,12 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 			(function () {
 				const data = document.getElementById('booking-data');
 				const basePrice = Number(data?.getAttribute('data-base-price')) || 0;
+				const model = data?.getAttribute('data-model') || '';
+				let pricesMatrix = [];
+				try {
+					const raw = data?.getAttribute('data-prices');
+					if (raw) pricesMatrix = JSON.parse(raw);
+				} catch (e) {}
 				const insuranceEl = document.getElementById('summary-insurance');
 				const insuranceTotalEl = document.getElementById('summary-insurance-total');
 				const totalEl = document.getElementById('summary-total');
@@ -805,12 +833,30 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 					return '€' + n.toFixed(2);
 				}
 
+				function getSeason(dateStr) {
+					var d = new Date(dateStr);
+					var month = d.getMonth() + 1;
+					var day = d.getDate();
+					if (month < 6) return 'low';
+					if (month > 9) return 'low';
+					if (month === 6 && day < 15) return 'low';
+					if (month === 9 && day > 30) return 'low';
+					return 'high';
+				}
+
+				function getPriceFromMatrix(scooterId, season, days) {
+					var row = pricesMatrix.find(function (p) {
+						return p.scooter_id === scooterId && p.season === season && p.days === days;
+					});
+					return row ? Number(row.price_eur) : NaN;
+				}
+
 				function getDays() {
 					if (!pickupInput?.value || !returnInput?.value) return null;
-					const a = new Date(pickupInput.value);
-					const b = new Date(returnInput.value);
+					var a = new Date(pickupInput.value);
+					var b = new Date(returnInput.value);
 					if (isNaN(a.getTime()) || isNaN(b.getTime()) || b < a) return null;
-					const diff = Math.round((b - a) / (24 * 60 * 60 * 1000));
+					var diff = Math.round((b - a) / (24 * 60 * 60 * 1000));
 					return diff < 1 ? 1 : diff;
 				}
 
@@ -827,8 +873,8 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 				}
 
 				function updateSummary() {
-					const days = getDays();
-					const radio = document.querySelector('input[name="insurance"]:checked');
+					var days = getDays();
+					var radio = document.querySelector('input[name="insurance"]:checked');
 					if (durationDaysEl) {
 						durationDaysEl.textContent = days != null ? (days === 1 ? '1 Day' : days + ' Days') : '—';
 					}
@@ -842,10 +888,14 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 						totalEl.textContent = '—';
 						return;
 					}
-					const value = radio?.value;
-					const perDay = value === 'full' ? fullPrice : basicPrice;
-					const insuranceTotal = perDay * days;
-					const total = basePrice * days + insuranceTotal;
+					var value = radio?.value;
+					var perDay = value === 'full' ? fullPrice : basicPrice;
+					var insuranceTotal = perDay * days;
+					var season = pickupInput?.value ? getSeason(pickupInput.value) : 'high';
+					var cappedDays = Math.min(Math.max(days, 1), 7);
+					var matrixPrice = getPriceFromMatrix(model, season, cappedDays);
+					var baseTotal = !isNaN(matrixPrice) ? matrixPrice : basePrice * days;
+					var total = baseTotal + insuranceTotal;
 					insuranceEl.textContent = formatEur(perDay);
 					insuranceTotalEl.textContent = formatEur(insuranceTotal);
 					totalEl.textContent = formatEur(total);
