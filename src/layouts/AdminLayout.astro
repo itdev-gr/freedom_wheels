@@ -7,7 +7,7 @@ import { isAdminAuthenticated } from '../lib/auth';
 		const path = Astro.url.pathname;
 		isLoginPage = path === '/admin' || path === '/admin/' || path === '/admin/login' || path === '/admin/login/';
 		if (!isLoginPage) {
-			const authenticated = isAdminAuthenticated(Astro.request);
+			const authenticated = await isAdminAuthenticated(Astro.request);
 			if (!authenticated) {
 				return Astro.redirect('/admin');
 			}

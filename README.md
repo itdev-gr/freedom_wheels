@@ -2,6 +2,23 @@
 
 Scooter rental website for Chania, Crete. Built with [Astro](https://astro.build).
 
+## Admin dashboard and Firebase Auth
+
+The admin area at `/admin` uses **Firebase Authentication** (email/password). Only users with the custom claim `admin: true` can access the dashboard.
+
+**Environment variables (Vercel / `.env`):**
+
+- **Server (Firestore + Auth):** `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` (from Firebase Console → Project settings → Service accounts → Generate new private key).
+- **Client (login page):** `PUBLIC_FIREBASE_API_KEY`, `PUBLIC_FIREBASE_AUTH_DOMAIN`, `PUBLIC_FIREBASE_PROJECT_ID`, `PUBLIC_FIREBASE_APP_ID` (from Firebase Console → Project settings → General → Your apps → Web app config).
+
+**Setting the admin claim:** After creating a user in Firebase Console → Authentication → Users, set the custom claim so they can access the dashboard:
+
+```bash
+FIREBASE_PROJECT_ID=your-project FIREBASE_CLIENT_EMAIL=... FIREBASE_PRIVATE_KEY='...' node scripts/set-admin-claim.mjs <USER_UID>
+```
+
+Get the user's UID from Firebase Console → Authentication → Users.
+
 ## Deploy on Vercel
 
 1. Push your code to GitHub (e.g. [itdev-gr/freedom_wheels](https://github.com/itdev-gr/freedom_wheels)).

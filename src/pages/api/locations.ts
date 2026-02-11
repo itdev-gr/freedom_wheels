@@ -28,7 +28,7 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-	if (!isAdminAuthenticated(request)) return json({ error: 'Unauthorized' }, 401);
+	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 export const PUT: APIRoute = async ({ request }) => {
-	if (!isAdminAuthenticated(request)) return json({ error: 'Unauthorized' }, 401);
+	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
@@ -68,7 +68,7 @@ export const PUT: APIRoute = async ({ request }) => {
 };
 
 export const DELETE: APIRoute = async ({ request }) => {
-	if (!isAdminAuthenticated(request)) return json({ error: 'Unauthorized' }, 401);
+	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	const url = new URL(request.url);

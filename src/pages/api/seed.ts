@@ -26,7 +26,7 @@ const SEED_PRICES_LOW: Array<{ scooterId: string; days: number; priceEur: number
 ];
 
 export const POST: APIRoute = async ({ request }) => {
-	if (!isAdminAuthenticated(request)) {
+	if (!(await isAdminAuthenticated(request))) {
 		return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
 	}
 	const db = getDb();

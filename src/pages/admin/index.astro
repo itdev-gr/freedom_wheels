@@ -2,7 +2,7 @@
 export const prerender = false;
 import { isAdminAuthenticated } from '../../lib/auth';
 try {
-	if (isAdminAuthenticated(Astro.request)) {
+	if (await isAdminAuthenticated(Astro.request)) {
 		return Astro.redirect('/admin/dashboard');
 	}
 } catch {
@@ -39,23 +39,50 @@ try {
 			</form>
 		</div>
 		<script>
+			import { getApps, initializeApp } from 'firebase/app';
+			import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+
+			const firebaseConfig = {
+				apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+				authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+				projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+				appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || '',
+			};
+
+			function getAuthInstance() {
+				if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) return null;
+				if (getApps().length === 0) initializeApp(firebaseConfig);
+				return getAuth();
+			}
+
 			document.getElementById('login-form')?.addEventListener('submit', async (e) => {
 				e.preventDefault();
 				const email = (document.getElementById('email') as HTMLInputElement).value.trim();
 				const password = (document.getElementById('password') as HTMLInputElement).value;
 				const errEl = document.getElementById('error');
 				if (errEl) errEl.textContent = '';
-				const res = await fetch('/api/admin-login', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ email, password }),
-					credentials: 'include',
-				});
-				if (res.ok) {
-					window.location.href = '/admin/dashboard';
-				} else {
-					const data = await res.json().catch(() => ({}));
-					if (errEl) errEl.textContent = data.error || 'Login failed';
+				const auth = getAuthInstance();
+				if (!auth) {
+					if (errEl) errEl.textContent = 'Firebase is not configured. Set PUBLIC_FIREBASE_* env vars.';
+					return;
+				}
+				try {
+					const userCred = await signInWithEmailAndPassword(auth, email, password);
+					const idToken = await userCred.user.getIdToken();
+					const res = await fetch('/api/admin-login', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ idToken }),
+						credentials: 'include',
+					});
+					if (res.ok) {
+						window.location.href = '/admin/dashboard';
+					} else {
+						const data = await res.json().catch(() => ({}));
+						if (errEl) errEl.textContent = data.error || 'Invalid email or password';
+					}
+				} catch {
+					if (errEl) errEl.textContent = 'Invalid email or password';
 				}
 			});
 		</script>

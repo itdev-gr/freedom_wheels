@@ -44,7 +44,7 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const PUT: APIRoute = async ({ request }) => {
-	if (!isAdminAuthenticated(request)) return json({ error: 'Unauthorized' }, 401);
+	if (!(await isAdminAuthenticated(request))) return json({ error: 'Unauthorized' }, 401);
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
