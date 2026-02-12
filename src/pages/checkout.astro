@@ -1,0 +1,855 @@
+---
+export const prerender = false;
+
+const title = 'Checkout | Freedom Wheels – Scooter Rental Chania';
+const description = 'Complete your scooter rental booking with Freedom Wheels in Chania.';
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/logos/logo.webp', Astro.site).href;
+
+const isSuccess = Astro.url.searchParams.get('success') === '1';
+const sessionId = Astro.url.searchParams.get('session_id') ?? '';
+---
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:locale" content="el_GR" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+		<link rel="icon" type="image/webp" href="/logos/logo.webp" />
+		<link rel="apple-touch-icon" href="/logos/logo.webp" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<header class="nav-bar nav-bar--scrolled" id="nav-bar">
+			<div class="nav-bar__inner">
+				<a href="/" class="logo">
+					<img src="/logos/logo.webp" alt="Freedom Wheels" class="logo__image" />
+				</a>
+				<nav class="nav-bar__links">
+					<a href="/rentals" class="nav-bar__link">Rentals</a>
+					<a href="/chania" class="nav-bar__link">Chania</a>
+					<a href="/about" class="nav-bar__link">About us</a>
+					<a href="/contact" class="nav-bar__link">Contact</a>
+					<a href="/book" class="nav-bar__cta">Book now</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="page">
+			<section class="checkout-section">
+				<!-- Success message (hidden by default) -->
+				<div id="success-banner" class="checkout-success" style="display:none;">
+					<div class="checkout-success__icon">&#10003;</div>
+					<h1 class="checkout-success__title">Booking Confirmed!</h1>
+					<p class="checkout-success__text">Thank you for your booking. We will contact you shortly to confirm all the details.</p>
+					<a href="/" class="checkout-btn checkout-btn--primary">Back to Home</a>
+				</div>
+
+				<!-- Main checkout form (hidden after success) -->
+				<div id="checkout-form-wrapper">
+					<h1 class="checkout-title">Complete Your Booking</h1>
+
+					<!-- Contact Details -->
+					<div class="checkout-card">
+						<h2 class="checkout-heading">Contact Details</h2>
+						<div class="checkout-field">
+							<label for="full-name">Full Name <span class="required">*</span></label>
+							<input type="text" id="full-name" name="full-name" placeholder="John Doe" required />
+						</div>
+						<div class="checkout-field">
+							<label for="email">Email <span class="required">*</span></label>
+							<input type="email" id="email" name="email" placeholder="john@example.com" required />
+						</div>
+						<div class="checkout-field">
+							<label for="phone">Phone <span class="required">*</span></label>
+							<input type="tel" id="phone" name="phone" placeholder="+30 69..." required />
+						</div>
+						<div class="checkout-field">
+							<label for="notes">Notes <span class="optional">(optional)</span></label>
+							<textarea id="notes" name="notes" rows="3" placeholder="Any special requests or information..."></textarea>
+						</div>
+					</div>
+
+					<!-- Booking Summary -->
+					<div class="checkout-card">
+						<h2 class="checkout-heading">Booking Summary</h2>
+						<div class="checkout-summary">
+							<div class="checkout-summary__row">
+								<span class="checkout-summary__label">Scooter</span>
+								<span id="sum-scooter" class="checkout-summary__value">—</span>
+							</div>
+							<div class="checkout-summary__row">
+								<span class="checkout-summary__label">Pick-up date</span>
+								<span id="sum-pickup-date" class="checkout-summary__value">—</span>
+							</div>
+							<div class="checkout-summary__row">
+								<span class="checkout-summary__label">Pick-up location</span>
+								<span id="sum-pickup-location" class="checkout-summary__value">—</span>
+							</div>
+							<div class="checkout-summary__row">
+								<span class="checkout-summary__label">Return date</span>
+								<span id="sum-return-date" class="checkout-summary__value">—</span>
+							</div>
+							<div class="checkout-summary__row">
+								<span class="checkout-summary__label">Return location</span>
+								<span id="sum-return-location" class="checkout-summary__value">—</span>
+							</div>
+							<div class="checkout-summary__row">
+								<span class="checkout-summary__label">Total days</span>
+								<span id="sum-days" class="checkout-summary__value">—</span>
+							</div>
+							<div class="checkout-summary__row checkout-summary__row--total">
+								<strong>Total Amount</strong>
+								<strong id="sum-total" class="checkout-summary__total-value">—</strong>
+							</div>
+						</div>
+					</div>
+
+					<!-- Error message -->
+					<div id="checkout-error" class="checkout-error" style="display:none;"></div>
+
+					<!-- Payment Buttons -->
+					<div class="checkout-actions">
+						<button type="button" id="btn-pay-delivery" class="checkout-btn checkout-btn--secondary">Pay on Delivery</button>
+						<button type="button" id="btn-pay-online" class="checkout-btn checkout-btn--primary">Online Payment</button>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<div class="site-footer__inner">
+				<div class="site-footer__col site-footer__company">
+					<div class="site-footer__logo">
+						<img src="/logos/logo.webp" alt="Freedom Wheels" class="site-footer__logo-img" />
+						<span class="site-footer__name">FREEDOM WHEELS</span>
+					</div>
+					<ul class="site-footer__contact">
+						<li>
+							<span class="site-footer__icon" aria-hidden="true">📍</span>
+							<span>7 Apokoronou Str, 73100 Chania, Crete, Greece</span>
+						</li>
+						<li>
+							<span class="site-footer__icon" aria-hidden="true">📞</span>
+							<a href="tel:+302821405794">+30 2821 405 794</a>
+						</li>
+						<li>
+							<span class="site-footer__icon" aria-hidden="true">✉️</span>
+							<a href="mailto:info@freedomwheels.gr">info@freedomwheels.gr</a>
+						</li>
+						<li><span>Αρ. ΓΕΜΗ: —</span></li>
+					</ul>
+				</div>
+				<div class="site-footer__col site-footer__links">
+					<h3 class="site-footer__heading">Σχετικά</h3>
+					<ul>
+						<li><a href="/#terms">Όροι Σύμβασης Μίσθωσης</a></li>
+						<li><a href="/#policy">Πολιτική Κρατήσεων - Ακυρώσεων</a></li>
+						<li><a href="/#cookies">Πολιτική Cookies</a></li>
+						<li><a href="/#terms-use">Όροι Χρήσης</a></li>
+						<li><a href="/#privacy">Πολιτική Απορρήτου</a></li>
+						<li><a href="/#payment">Τρόποι Πληρωμής</a></li>
+						<li><a href="/contact">Επικοινωνία</a></li>
+					</ul>
+				</div>
+				<div class="site-footer__col site-footer__hours">
+					<h3 class="site-footer__heading">Ωράριο</h3>
+					<p class="site-footer__hours-text">Δευ - Παρ: 09:00 - 19:00</p>
+					<p class="site-footer__hours-text">Σαβ: 09:00 - 14:00</p>
+					<p class="site-footer__hours-text">Κυρ: Κλειστά</p>
+				</div>
+			</div>
+			<div class="site-footer__bottom">
+				<p class="site-footer__copyright">Copyright 2026 © Freedom Wheels · Powered by <a href="https://www.itdev.gr/" target="_blank" rel="noopener noreferrer">IT DEV</a></p>
+			</div>
+		</footer>
+
+		<style>
+			:root {
+				--font-heading: Georgia, 'Times New Roman', serif;
+				--font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+				--color-primary: #1d8299;
+				--color-primary-dark: #176f82;
+			}
+
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+			}
+
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				font-family: var(--font-body);
+				background-color: #ffffff;
+				color: #1a1a1a;
+			}
+
+			body {
+				min-height: 100vh;
+			}
+
+			.page {
+				padding-top: 70px;
+			}
+
+			/* Nav bar */
+			.nav-bar {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				z-index: 30;
+				background-color: transparent;
+				backdrop-filter: blur(8px);
+				transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
+			}
+
+			.nav-bar--scrolled {
+				background-color: rgba(85, 83, 86, 0.5);
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+			}
+
+			.nav-bar__inner {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 0.85rem 2rem;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 2rem;
+			}
+
+			.logo {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.65rem;
+				color: #ffffff;
+				text-decoration: none;
+			}
+
+			.logo__image {
+				height: 48px;
+				width: auto;
+				display: block;
+			}
+
+			.nav-bar__links {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+
+			.nav-bar__link {
+				font-family: var(--font-body);
+				display: inline-block;
+				padding: 0.5rem 1rem;
+				border-radius: 999px;
+				background-color: rgba(128, 128, 128, 0.85);
+				color: #ffffff;
+				font-size: 0.75rem;
+				font-weight: 500;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				text-decoration: none;
+				transition: background-color 150ms ease-out;
+			}
+
+			.nav-bar__link:hover {
+				background-color: rgba(100, 100, 100, 0.95);
+				color: #ffffff;
+			}
+
+			.nav-bar__cta {
+				font-family: var(--font-body);
+				display: inline-block;
+				padding: 0.5rem 1.25rem;
+				border-radius: 999px;
+				background-color: #1a1a1a;
+				color: #ffffff;
+				font-size: 0.75rem;
+				font-weight: 600;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				text-decoration: none;
+				transition: background-color 150ms ease-out;
+			}
+
+			.nav-bar__cta:hover {
+				background-color: #333;
+			}
+
+			/* Footer */
+			.site-footer {
+				background-color: var(--color-primary);
+				color: #fff;
+				padding: 3rem 2rem 0;
+				font-family: var(--font-body);
+			}
+
+			.site-footer__inner {
+				max-width: 1200px;
+				margin: 0 auto;
+				display: flex;
+				gap: 3rem;
+				flex-wrap: wrap;
+				padding-bottom: 2rem;
+			}
+
+			.site-footer__col {
+				flex: 1 1 200px;
+				min-width: 0;
+			}
+
+			.site-footer__company {
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+			}
+
+			.site-footer__logo {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.site-footer__logo-img {
+				height: 48px;
+				width: auto;
+				object-fit: contain;
+			}
+
+			.site-footer__name {
+				font-size: 1.25rem;
+				font-weight: 600;
+				letter-spacing: 0.05em;
+				color: #fff;
+			}
+
+			.site-footer__contact {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+
+			.site-footer__contact li {
+				display: flex;
+				align-items: flex-start;
+				gap: 0.5rem;
+			}
+
+			.site-footer__icon {
+				flex-shrink: 0;
+			}
+
+			.site-footer__contact a,
+			.site-footer__contact span {
+				color: #fff;
+				text-decoration: none;
+				font-size: 0.95rem;
+			}
+
+			.site-footer__contact a:hover {
+				text-decoration: underline;
+			}
+
+			.site-footer__heading {
+				font-size: 1.1rem;
+				font-weight: 600;
+				margin: 0 0 1rem;
+				color: #fff;
+				letter-spacing: 0.02em;
+			}
+
+			.site-footer__links ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+
+			.site-footer__links li {
+				margin-bottom: 0.4rem;
+			}
+
+			.site-footer__links a {
+				color: #fff;
+				text-decoration: none;
+				font-size: 0.95rem;
+			}
+
+			.site-footer__links a:hover {
+				text-decoration: underline;
+			}
+
+			.site-footer__hours-text {
+				margin: 0 0 0.4rem;
+				font-size: 0.95rem;
+				color: #fff;
+			}
+
+			.site-footer__bottom {
+				border-top: 1px solid rgba(255, 255, 255, 0.35);
+				padding: 1rem 2rem;
+				text-align: left;
+			}
+
+			.site-footer__copyright {
+				margin: 0;
+				font-size: 0.85rem;
+				color: rgba(255, 255, 255, 0.85);
+			}
+
+			.site-footer__copyright a {
+				color: rgba(255, 255, 255, 0.9);
+				text-decoration: none;
+			}
+
+			.site-footer__copyright a:hover {
+				text-decoration: underline;
+			}
+
+			/* Checkout section */
+			.checkout-section {
+				background-color: #f5f5f5;
+				padding: 2rem 1.5rem;
+				min-height: 60vh;
+				max-width: 700px;
+				margin: 0 auto;
+			}
+
+			.checkout-title {
+				color: var(--color-primary);
+				font-size: 1.6rem;
+				font-weight: 700;
+				margin: 0 0 1.5rem;
+				text-align: center;
+			}
+
+			.checkout-heading {
+				color: var(--color-primary);
+				font-size: 1.2rem;
+				font-weight: 700;
+				margin: 0 0 1rem;
+				padding-bottom: 0.5rem;
+				border-bottom: 2px solid var(--color-primary);
+			}
+
+			.checkout-card {
+				background: #fff;
+				border-radius: 10px;
+				box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+				padding: 1.5rem;
+				margin-bottom: 1.25rem;
+			}
+
+			/* Form fields */
+			.checkout-field {
+				margin-bottom: 1rem;
+			}
+
+			.checkout-field:last-child {
+				margin-bottom: 0;
+			}
+
+			.checkout-field label {
+				display: block;
+				font-size: 0.9rem;
+				font-weight: 600;
+				color: #333;
+				margin-bottom: 0.35rem;
+			}
+
+			.required {
+				color: #e53e3e;
+			}
+
+			.optional {
+				color: #999;
+				font-weight: 400;
+				font-size: 0.8rem;
+			}
+
+			.checkout-field input,
+			.checkout-field textarea {
+				width: 100%;
+				padding: 0.6rem 0.75rem;
+				font-size: 0.95rem;
+				border: 1px solid #ccc;
+				border-radius: 6px;
+				background: #fff;
+				color: #1a1a1a;
+				font-family: var(--font-body);
+				transition: border-color 0.2s ease, box-shadow 0.2s ease;
+			}
+
+			.checkout-field input:focus,
+			.checkout-field textarea:focus {
+				outline: none;
+				border-color: var(--color-primary);
+				box-shadow: 0 0 0 2px rgba(29, 130, 153, 0.2);
+			}
+
+			.checkout-field textarea {
+				resize: vertical;
+			}
+
+			/* Summary */
+			.checkout-summary__row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 0.5rem 0;
+				border-bottom: 1px solid #f0f0f0;
+				font-size: 0.95rem;
+			}
+
+			.checkout-summary__row:last-child {
+				border-bottom: none;
+			}
+
+			.checkout-summary__label {
+				color: #555;
+			}
+
+			.checkout-summary__value {
+				font-weight: 500;
+				color: #1a1a1a;
+			}
+
+			.checkout-summary__row--total {
+				border-bottom: none;
+				border-top: 2px solid #eee;
+				margin-top: 0.5rem;
+				padding-top: 0.75rem;
+				font-size: 1.1rem;
+			}
+
+			.checkout-summary__total-value {
+				color: var(--color-primary);
+			}
+
+			/* Buttons */
+			.checkout-actions {
+				display: flex;
+				gap: 1rem;
+				margin-top: 0.25rem;
+			}
+
+			.checkout-btn {
+				flex: 1;
+				padding: 0.9rem 1.5rem;
+				font-size: 1rem;
+				font-weight: 600;
+				border-radius: 8px;
+				border: none;
+				cursor: pointer;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				transition: background-color 0.2s ease, opacity 0.2s ease;
+			}
+
+			.checkout-btn:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+			}
+
+			.checkout-btn--primary {
+				background-color: var(--color-primary);
+				color: #fff;
+			}
+
+			.checkout-btn--primary:hover:not(:disabled) {
+				background-color: var(--color-primary-dark);
+			}
+
+			.checkout-btn--secondary {
+				background-color: #fff;
+				color: var(--color-primary);
+				border: 2px solid var(--color-primary);
+			}
+
+			.checkout-btn--secondary:hover:not(:disabled) {
+				background-color: rgba(29, 130, 153, 0.08);
+			}
+
+			/* Error */
+			.checkout-error {
+				background: #fff5f5;
+				color: #c53030;
+				border: 1px solid #feb2b2;
+				border-radius: 8px;
+				padding: 0.75rem 1rem;
+				margin-bottom: 1rem;
+				font-size: 0.9rem;
+			}
+
+			/* Success */
+			.checkout-success {
+				text-align: center;
+				padding: 3rem 1rem;
+			}
+
+			.checkout-success__icon {
+				width: 64px;
+				height: 64px;
+				margin: 0 auto 1.5rem;
+				background-color: #c6f6d5;
+				color: #22543d;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 2rem;
+				font-weight: 700;
+			}
+
+			.checkout-success__title {
+				color: var(--color-primary);
+				font-size: 1.6rem;
+				margin: 0 0 0.75rem;
+			}
+
+			.checkout-success__text {
+				color: #555;
+				font-size: 1.05rem;
+				margin: 0 0 2rem;
+				max-width: 500px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			@media (max-width: 600px) {
+				.checkout-actions {
+					flex-direction: column;
+				}
+
+				.nav-bar__links {
+					display: none;
+				}
+			}
+		</style>
+
+		<script is:inline define:vars={{ isSuccess, sessionId }}>
+			(function () {
+				var stored = localStorage.getItem('fw_checkout');
+				var booking = stored ? JSON.parse(stored) : null;
+
+				var formWrapper = document.getElementById('checkout-form-wrapper');
+				var successBanner = document.getElementById('success-banner');
+				var errorEl = document.getElementById('checkout-error');
+
+				function showError(msg) {
+					if (errorEl) {
+						errorEl.textContent = msg;
+						errorEl.style.display = 'block';
+					}
+				}
+
+				function hideError() {
+					if (errorEl) errorEl.style.display = 'none';
+				}
+
+				// If returning from Stripe success
+				if (isSuccess) {
+					if (formWrapper) formWrapper.style.display = 'none';
+					if (successBanner) successBanner.style.display = 'block';
+
+					// Save booking to Firestore if we have data
+					if (booking) {
+						var nameVal = booking.customerName || '';
+						var emailVal = booking.customerEmail || '';
+						var phoneVal = booking.customerPhone || '';
+						var notesVal = booking.customerNotes || '';
+
+						fetch('/api/public-booking', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								customerName: nameVal,
+								email: emailVal,
+								phone: phoneVal,
+								scooterId: booking.model,
+								pickupDate: booking.pickupDate,
+								returnDate: booking.returnDate,
+								pickupLocationId: booking.pickupLocation,
+								returnLocationId: booking.returnLocation,
+								totalEur: booking.totalEur,
+								status: 'Completed',
+								notes: notesVal,
+								paymentMethod: 'online',
+							}),
+						}).finally(function () {
+							localStorage.removeItem('fw_checkout');
+						});
+					}
+					return;
+				}
+
+				// If no booking data, redirect back
+				if (!booking) {
+					window.location.href = '/book';
+					return;
+				}
+
+				// Populate summary
+				var sumScooter = document.getElementById('sum-scooter');
+				var sumPickupDate = document.getElementById('sum-pickup-date');
+				var sumPickupLoc = document.getElementById('sum-pickup-location');
+				var sumReturnDate = document.getElementById('sum-return-date');
+				var sumReturnLoc = document.getElementById('sum-return-location');
+				var sumDays = document.getElementById('sum-days');
+				var sumTotal = document.getElementById('sum-total');
+
+				if (sumScooter) sumScooter.textContent = booking.scooterTitle || booking.model;
+				if (sumPickupDate) sumPickupDate.textContent = booking.pickupDate;
+				if (sumPickupLoc) sumPickupLoc.textContent = booking.pickupLocationLabel || booking.pickupLocation;
+				if (sumReturnDate) sumReturnDate.textContent = booking.returnDate;
+				if (sumReturnLoc) sumReturnLoc.textContent = booking.returnLocationLabel || booking.returnLocation;
+				if (sumDays) sumDays.textContent = booking.totalDays + (booking.totalDays === 1 ? ' Day' : ' Days');
+				if (sumTotal) sumTotal.textContent = '\u20AC' + Number(booking.totalEur).toFixed(2);
+
+				function getFormData() {
+					return {
+						name: (document.getElementById('full-name')?.value || '').trim(),
+						email: (document.getElementById('email')?.value || '').trim(),
+						phone: (document.getElementById('phone')?.value || '').trim(),
+						notes: (document.getElementById('notes')?.value || '').trim(),
+					};
+				}
+
+				function validate() {
+					var form = getFormData();
+					if (!form.name) { showError('Please enter your full name.'); return null; }
+					if (!form.email) { showError('Please enter your email address.'); return null; }
+					if (!form.phone) { showError('Please enter your phone number.'); return null; }
+					hideError();
+					return form;
+				}
+
+				function disableButtons(disabled) {
+					var btn1 = document.getElementById('btn-pay-delivery');
+					var btn2 = document.getElementById('btn-pay-online');
+					if (btn1) btn1.disabled = disabled;
+					if (btn2) btn2.disabled = disabled;
+				}
+
+				// Pay on Delivery
+				var deliveryBtn = document.getElementById('btn-pay-delivery');
+				if (deliveryBtn) {
+					deliveryBtn.addEventListener('click', function () {
+						var form = validate();
+						if (!form) return;
+						disableButtons(true);
+						deliveryBtn.textContent = 'Processing...';
+
+						fetch('/api/public-booking', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								customerName: form.name,
+								email: form.email,
+								phone: form.phone,
+								scooterId: booking.model,
+								pickupDate: booking.pickupDate,
+								returnDate: booking.returnDate,
+								pickupLocationId: booking.pickupLocation,
+								returnLocationId: booking.returnLocation,
+								totalEur: booking.totalEur,
+								status: 'Pending',
+								notes: form.notes,
+								paymentMethod: 'delivery',
+							}),
+						})
+							.then(function (res) { return res.json(); })
+							.then(function (data) {
+								if (data.ok) {
+									localStorage.removeItem('fw_checkout');
+									if (formWrapper) formWrapper.style.display = 'none';
+									if (successBanner) successBanner.style.display = 'block';
+								} else {
+									showError(data.error || 'Something went wrong. Please try again.');
+									disableButtons(false);
+									deliveryBtn.textContent = 'Pay on Delivery';
+								}
+							})
+							.catch(function () {
+								showError('Network error. Please try again.');
+								disableButtons(false);
+								deliveryBtn.textContent = 'Pay on Delivery';
+							});
+					});
+				}
+
+				// Online Payment (Stripe)
+				var onlineBtn = document.getElementById('btn-pay-online');
+				if (onlineBtn) {
+					onlineBtn.addEventListener('click', function () {
+						var form = validate();
+						if (!form) return;
+						disableButtons(true);
+						onlineBtn.textContent = 'Redirecting...';
+
+						// Save contact info to localStorage so we can use it after Stripe redirect
+						booking.customerName = form.name;
+						booking.customerEmail = form.email;
+						booking.customerPhone = form.phone;
+						booking.customerNotes = form.notes;
+						localStorage.setItem('fw_checkout', JSON.stringify(booking));
+
+						fetch('/api/create-checkout', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								customerName: form.name,
+								email: form.email,
+								phone: form.phone,
+								scooterId: booking.model,
+								scooterTitle: booking.scooterTitle,
+								pickupDate: booking.pickupDate,
+								returnDate: booking.returnDate,
+								pickupLocationId: booking.pickupLocation,
+								returnLocationId: booking.returnLocation,
+								totalEur: booking.totalEur,
+								totalDays: booking.totalDays,
+								notes: form.notes,
+							}),
+						})
+							.then(function (res) { return res.json(); })
+							.then(function (data) {
+								if (data.url) {
+									window.location.href = data.url;
+								} else {
+									showError(data.error || 'Failed to create payment session.');
+									disableButtons(false);
+									onlineBtn.textContent = 'Online Payment';
+								}
+							})
+							.catch(function () {
+								showError('Network error. Please try again.');
+								disableButtons(false);
+								onlineBtn.textContent = 'Online Payment';
+							});
+					});
+				}
+			})();
+		</script>
+	</body>
+</html>

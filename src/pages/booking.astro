@@ -199,8 +199,8 @@ if (locations.length === 0) {
 								<strong>Total price</strong>
 								<strong id="summary-total">—</strong>
 							</div>
-							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" data-model={modelParam} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} hidden></div>
-							<a href={`/contact?model=${modelParam}`} class="booking-cta">Payment upon pickup</a>
+							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" data-model={modelParam} data-scooter-title={scooter.title} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} hidden></div>
+							<button type="button" id="continue-booking-btn" class="booking-cta">Continue Booking</button>
 						</div>
 					</div>
 				</div>
@@ -964,6 +964,47 @@ if (locations.length === 0) {
 				document.querySelectorAll('input[name="insurance"]').forEach(function (input) {
 					input.addEventListener('change', updateSummary);
 				});
+
+				// Continue Booking button
+				var continueBtn = document.getElementById('continue-booking-btn');
+				if (continueBtn) {
+					continueBtn.addEventListener('click', function () {
+						var pickupLoc = document.getElementById('pickup-location');
+						var returnLoc = document.getElementById('return-location');
+						if (!pickupInput?.value || !returnInput?.value || !pickupLoc?.value || !returnLoc?.value) {
+							alert('Please fill in all dates and locations before continuing.');
+							return;
+						}
+						var days = getDays();
+						if (days == null || days < 1) {
+							alert('Please select valid pickup and return dates.');
+							return;
+						}
+						var totalText = totalEl?.textContent || '';
+						var totalNum = parseFloat(totalText.replace('€', '')) || 0;
+						// Find location labels
+						var pickupLabel = '';
+						var returnLabel = '';
+						locationsList.forEach(function (loc) {
+							if (loc.slug === pickupLoc.value || loc.id === pickupLoc.value) pickupLabel = loc.label;
+							if (loc.slug === returnLoc.value || loc.id === returnLoc.value) returnLabel = loc.label;
+						});
+						var bookingData = {
+							model: model,
+							scooterTitle: data?.getAttribute('data-scooter-title') || '',
+							pickupDate: pickupInput.value,
+							returnDate: returnInput.value,
+							pickupLocation: pickupLoc.value,
+							pickupLocationLabel: pickupLabel,
+							returnLocation: returnLoc.value,
+							returnLocationLabel: returnLabel,
+							totalDays: days,
+							totalEur: totalNum
+						};
+						localStorage.setItem('fw_checkout', JSON.stringify(bookingData));
+						window.location.href = '/checkout';
+					});
+				}
 			})();
 		</script>
 	</body>
