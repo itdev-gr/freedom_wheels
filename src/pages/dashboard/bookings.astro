@@ -6,7 +6,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 	<h1>Bookings</h1>
 	<div class="dash-card">
 		<h2 style="margin-top: 0; font-size: 1.1rem;">New booking</h2>
-		<form id="booking-form" class="dash-form">
+		<form id="booking-form" class="dash-form booking-form-grid">
 			<div class="dash-field">
 				<label>Customer name</label>
 				<input type="text" name="customerName" required />
@@ -56,14 +56,31 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 					<option value="cancelled">Cancelled</option>
 				</select>
 			</div>
-			<div class="dash-field">
+			<div class="dash-field" style="grid-column: 1 / -1;">
 				<label>Notes</label>
-				<textarea name="notes"></textarea>
+				<textarea name="notes" style="max-width: 100%;"></textarea>
 			</div>
-			<button type="submit" class="dash-btn">Create booking</button>
+			<div style="grid-column: 1 / -1;">
+				<button type="submit" class="dash-btn">Create booking</button>
+			</div>
 		</form>
 		<p id="booking-form-msg" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;"></p>
 	</div>
+	<style>
+		.booking-form-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 0.75rem 1.25rem;
+		}
+		.booking-form-grid .dash-field {
+			margin-bottom: 0;
+		}
+		.booking-form-grid input,
+		.booking-form-grid select,
+		.booking-form-grid textarea {
+			max-width: 100%;
+		}
+	</style>
 	<div class="dash-card">
 		<h2 style="margin-top: 0; font-size: 1.1rem;">All bookings</h2>
 		<table class="dash-table" id="bookings-table">
