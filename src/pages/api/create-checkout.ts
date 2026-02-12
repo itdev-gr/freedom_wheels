@@ -14,7 +14,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 	const secretKey = import.meta.env.STRIPE_SECRET_KEY;
 	if (!secretKey) return json({ error: 'Stripe not configured' }, 503);
 
-	const stripe = new Stripe(secretKey, { apiVersion: '2025-01-27.acacia' });
+	const stripe = new Stripe(secretKey);
 
 	try {
 		const body = (await request.json()) as {
