@@ -140,7 +140,7 @@ if (locations.length === 0) {
 						<div class="booking-summary-card">
 							<div class="booking-summary__row">
 								<span>Base price</span>
-								<span class="booking-summary__base-price">€{scooter.basePricePerDay.toFixed(2)}</span>
+								<span class="booking-summary__base-price">—</span>
 							</div>
 							<p class="booking-summary__subtext">Rental per day</p>
 							<div class="booking-summary__row">
@@ -902,9 +902,24 @@ if (locations.length === 0) {
 						if (loc.id === returnLocId && loc.price_eur != null && returnLocId !== pickupLocId) locPrice += Number(loc.price_eur);
 					});
 					var season = pickupInput?.value ? getSeason(pickupInput.value) : 'high';
-					var cappedDays = Math.min(Math.max(days, 1), 7);
-					var matrixPrice = getPriceFromMatrix(model, season, cappedDays);
-					var baseTotal = !isNaN(matrixPrice) ? matrixPrice : basePrice * days;
+					var baseTotal;
+					if (days <= 7) {
+						var matrixPrice = getPriceFromMatrix(model, season, days);
+						baseTotal = !isNaN(matrixPrice) ? matrixPrice : basePrice * days;
+					} else {
+						var price7 = getPriceFromMatrix(model, season, 7);
+						if (!isNaN(price7) && price7 > 0) {
+							var dailyRate = price7 / 7;
+							var extraDays = days - 7;
+							baseTotal = price7 + (dailyRate * extraDays);
+						} else {
+							baseTotal = basePrice * days;
+						}
+					}
+					// Dynamic base price from matrix (1-day price for current season)
+					var basePriceEl = document.querySelector('.booking-summary__base-price');
+					var dayOnePrice = getPriceFromMatrix(model, season, 1);
+					if (basePriceEl) basePriceEl.textContent = !isNaN(dayOnePrice) ? formatEur(dayOnePrice) : formatEur(basePrice);
 					var total = baseTotal + insuranceTotal + locPrice;
 					insuranceEl.textContent = formatEur(perDay);
 					insuranceTotalEl.textContent = formatEur(insuranceTotal);
