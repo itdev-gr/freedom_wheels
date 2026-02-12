@@ -882,7 +882,13 @@ if (locations.length === 0) {
 					var b = new Date(returnInput.value);
 					if (isNaN(a.getTime()) || isNaN(b.getTime()) || b < a) return null;
 					var diff = Math.round((b - a) / (24 * 60 * 60 * 1000));
-					return diff < 1 ? 1 : diff;
+					return diff < 2 ? null : diff;
+				}
+
+				function addDays(dateStr, n) {
+					var d = new Date(dateStr);
+					d.setDate(d.getDate() + n);
+					return d.toISOString().slice(0, 10);
 				}
 
 				function setMinDates() {
@@ -891,8 +897,16 @@ if (locations.length === 0) {
 					var todayStr = today.toISOString().slice(0, 10);
 					if (pickupInput) {
 						pickupInput.setAttribute('min', todayStr);
+						// Enforce: if pickup is in the past, clear it
+						if (pickupInput.value && pickupInput.value < todayStr) {
+							pickupInput.value = '';
+						}
 						if (pickupInput.value && returnInput) {
-							returnInput.setAttribute('min', pickupInput.value);
+							var minReturn = addDays(pickupInput.value, 2);
+							returnInput.setAttribute('min', minReturn);
+							if (returnInput.value && returnInput.value < minReturn) {
+								returnInput.value = '';
+							}
 						}
 					}
 				}
@@ -952,7 +966,13 @@ if (locations.length === 0) {
 				setMinDates();
 				if (pickupInput) {
 					pickupInput.addEventListener('change', function () {
-						if (returnInput && this.value) returnInput.setAttribute('min', this.value);
+						if (returnInput && this.value) {
+							var minReturn = addDays(this.value, 2);
+							returnInput.setAttribute('min', minReturn);
+							if (returnInput.value && returnInput.value < minReturn) {
+								returnInput.value = '';
+							}
+						}
 						updateSummary();
 					});
 				}
