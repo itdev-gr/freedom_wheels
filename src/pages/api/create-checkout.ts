@@ -75,6 +75,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 		return json({ url: session.url });
 	} catch (e) {
 		console.error('Stripe error:', e);
-		return json({ error: 'Failed to create checkout session' }, 500);
+		const message = e instanceof Error ? e.message : 'Unknown error';
+		return json({ error: 'Failed to create checkout session: ' + message }, 500);
 	}
 };
