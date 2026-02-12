@@ -1,5 +1,6 @@
 ---
 export const prerender = false;
+import { getDb } from '../lib/firebase';
 
 const title = 'Request a booking | Freedom Wheels – Scooter Rental Chania';
 const description = 'Send your scooter rental booking request to Freedom Wheels in Chania. We\'ll confirm availability and price by email or phone.';
@@ -18,13 +19,32 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 let locations: Array<{ id: string; slug: string; label: string; sort_order: number; price_eur?: number | null }> = [];
 let pricesMatrix: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
 try {
-	const base = Astro.url.origin;
-	const [locRes, priceRes] = await Promise.all([
-		fetch(`${base}/api/locations`),
-		fetch(`${base}/api/prices`),
-	]);
-	if (locRes.ok) locations = await locRes.json();
-	if (priceRes.ok) pricesMatrix = await priceRes.json();
+	const db = getDb();
+	if (db) {
+		const [locSnap, priceSnap] = await Promise.all([
+			db.collection('locations').orderBy('sortOrder').get(),
+			db.collection('prices').get(),
+		]);
+		locations = locSnap.docs.map((d) => {
+			const data = d.data();
+			return {
+				id: d.id,
+				slug: data.slug,
+				label: data.label,
+				sort_order: data.sortOrder,
+				price_eur: data.priceEur != null ? data.priceEur : null,
+			};
+		});
+		pricesMatrix = priceSnap.docs.map((d) => {
+			const data = d.data();
+			return {
+				scooter_id: data.scooterId,
+				season: data.season,
+				days: data.days,
+				price_eur: data.priceEur,
+			};
+		});
+	}
 } catch {
 	// fallback to hardcoded below
 }
@@ -83,20 +103,6 @@ if (locations.length === 0) {
 							<img src={scooter.image} alt={scooter.title} class="booking-scooter__img" />
 							<h1 class="booking-scooter__title">{scooter.title}</h1>
 							<p class="booking-scooter__subtitle">{scooter.subtitle}</p>
-							<div class="booking-scooter__dates">
-								<div class="booking-date-row">
-									<label for="pickup-date">Pick-up date</label>
-									<input type="date" id="pickup-date" name="pickup-date" class="booking-date-input" />
-								</div>
-								<div class="booking-date-row">
-									<label for="return-date">Return date</label>
-									<input type="date" id="return-date" name="return-date" class="booking-date-input" />
-								</div>
-								<div class="booking-scooter__duration">
-									<strong>Rental duration</strong>
-									<span id="duration-days">—</span>
-								</div>
-							</div>
 							<ul class="booking-scooter__features" aria-label="Features">
 								<li>Manual</li>
 								<li>Electric Start</li>
@@ -130,6 +136,22 @@ if (locations.length === 0) {
 										<option value={loc.slug}>{loc.label}</option>
 									))}
 								</select>
+							</div>
+						</div>
+
+						<h2 class="booking-heading">Dates</h2>
+						<div class="booking-location-card">
+							<div class="booking-date-row">
+								<label for="pickup-date">Pick-up date</label>
+								<input type="date" id="pickup-date" name="pickup-date" class="booking-date-input" />
+							</div>
+							<div class="booking-date-row">
+								<label for="return-date">Return date</label>
+								<input type="date" id="return-date" name="return-date" class="booking-date-input" />
+							</div>
+							<div class="booking-scooter__duration">
+								<strong>Rental duration</strong>
+								<span id="duration-days">—</span>
 							</div>
 						</div>
 					</div>
