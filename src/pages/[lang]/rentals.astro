@@ -1,0 +1,309 @@
+---
+export const prerender = false;
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import en from '../../locales/en';
+import el from '../../locales/el';
+import { getDb } from '../../lib/firebase';
+
+const { lang } = Astro.params;
+if (lang !== 'en' && lang !== 'el') {
+	return Astro.redirect('/en');
+}
+
+const t = lang === 'el' ? el : en;
+
+let prices: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
+try {
+	const db = getDb();
+	if (db) {
+		const priceSnap = await db.collection('prices').get();
+		prices = priceSnap.docs.map((d) => {
+			const data = d.data();
+			return {
+				scooter_id: data.scooterId,
+				season: data.season,
+				days: data.days,
+				price_eur: data.priceEur,
+			};
+		});
+	}
+} catch {
+	// leave prices empty
+}
+
+const SCOOTER_ROWS = [
+	{ id: 'liberty-125', label: 'LIBERTY 125cc' },
+	{ id: 'sh-125', label: 'SH 125cc' },
+	{ id: 'sim-200', label: 'SIM 200cc' },
+	{ id: 'voge-rally-300', label: 'VOGE RALLY 300cc' },
+];
+
+function getPrice(season: string, scooterId: string, days: number): number {
+	const row = prices.find((p) => p.scooter_id === scooterId && p.season === season && p.days === days);
+	return row?.price_eur ?? 0;
+}
+
+function formatPrice(season: string, scooterId: string, days: number): number | string {
+	const p = getPrice(season, scooterId, days);
+	return p > 0 ? p : '—';
+}
+
+const site = Astro.site ?? new URL(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/logos/logo.webp', site).href;
+---
+
+<PublicLayout lang={lang} title={t.rentals.title} description={t.rentals.description} canonical={canonical} ogImage={ogImage} t={t}>
+	<div class="rentals-flyer__hero">
+		<img src="/images/rentals-hero.png" alt="Couple enjoying a scooter ride in Chania" />
+	</div>
+
+	<main class="page page--hero-top">
+		<div class="rentals-flyer">
+			<div class="rentals-flyer__body">
+				<aside class="rentals-flyer__sidebar">
+					<div class="rentals-flyer__sidebar-card">
+						<div class="rentals-flyer__sidebar-img">
+							<img src="/images/sh-125.png" alt="SH 125cc 2024" />
+						</div>
+						<span class="rentals-flyer__sidebar-label">SH 125cc 2024</span>
+					</div>
+					<div class="rentals-flyer__sidebar-card">
+						<div class="rentals-flyer__sidebar-img">
+							<img src="/images/sim-200.png" alt="SIM 200cc 2025" />
+						</div>
+						<span class="rentals-flyer__sidebar-label">SIM 200cc 2025</span>
+					</div>
+					<div class="rentals-flyer__sidebar-card">
+						<div class="rentals-flyer__sidebar-img">
+							<img src="/images/liberty-125.png" alt="LIBERTY 125cc 2025" />
+						</div>
+						<span class="rentals-flyer__sidebar-label">LIBERTY 125cc 2025</span>
+					</div>
+					<div class="rentals-flyer__sidebar-card">
+						<div class="rentals-flyer__sidebar-img">
+							<img src="/images/voge-rally-300.png" alt="VOGE RALLY 300cc 2024" />
+						</div>
+						<span class="rentals-flyer__sidebar-label">VOGE RALLY 300cc 2024</span>
+					</div>
+				</aside>
+
+				<div class="rentals-flyer__content">
+					<h1 class="rentals-flyer__title">{t.rentals.pageTitle} <span class="rentals-flyer__title-accent">{t.rentals.titleAccent}</span></h1>
+					<p class="rentals-flyer__desc">{t.rentals.desc}</p>
+
+					<div class="rentals-flyer__season">
+						<div class="rentals-flyer__season-bar">{t.rentals.highSeason} <span class="rentals-flyer__season-dates">{t.rentals.highSeasonDates}</span></div>
+						<div class="rentals-flyer__table-wrap">
+							<table class="rentals-flyer__table">
+								<thead>
+									<tr>
+										<th>{t.rentals.days}</th>
+										<th>1</th>
+										<th>2</th>
+										<th>3</th>
+										<th>4</th>
+										<th>5</th>
+										<th>6</th>
+										<th>7</th>
+									</tr>
+								</thead>
+								<tbody>
+									{SCOOTER_ROWS.map((s) => (
+										<tr>
+											<td>{s.label}</td>
+											{[1, 2, 3, 4, 5, 6, 7].map((days) => (
+												<td>{formatPrice('high', s.id, days)}</td>
+											))}
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="rentals-flyer__season">
+						<div class="rentals-flyer__season-bar">{t.rentals.lowSeason} <span class="rentals-flyer__season-dates">{t.rentals.lowSeasonDates}</span></div>
+						<div class="rentals-flyer__table-wrap">
+							<table class="rentals-flyer__table">
+								<thead>
+									<tr>
+										<th>{t.rentals.days}</th>
+										<th>1</th>
+										<th>2</th>
+										<th>3</th>
+										<th>4</th>
+										<th>5</th>
+										<th>6</th>
+										<th>7</th>
+									</tr>
+								</thead>
+								<tbody>
+									{SCOOTER_ROWS.map((s) => (
+										<tr>
+											<td>{s.label}</td>
+											{[1, 2, 3, 4, 5, 6, 7].map((days) => (
+												<td>{formatPrice('low', s.id, days)}</td>
+											))}
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div class="rentals-flyer__inclusions">{t.rentals.inclusions}</div>
+					<div class="rentals-flyer__book-wrap">
+						<a href={`/${lang}/book`} class="rentals-flyer__book-btn">{t.rentals.bookNow}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<style is:global>
+		.page { padding-top: 70px; }
+		.page--hero-top { padding-top: 0; }
+		.rentals-flyer {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 1.5rem;
+			background: #fff;
+		}
+		.rentals-flyer__hero {
+			width: 100vw;
+			margin: 0 calc(-50vw + 50%);
+			margin-bottom: 1.5rem;
+			overflow: hidden;
+			height: 76.5vh;
+			max-height: 76.5vh;
+		}
+		.rentals-flyer__hero img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+		.rentals-flyer__body {
+			display: flex;
+			flex-direction: column;
+			gap: 2rem;
+		}
+		.rentals-flyer__content { min-width: 0; }
+		.rentals-flyer__title {
+			font-size: clamp(1.35rem, 3vw, 1.75rem);
+			font-weight: 700;
+			margin: 0 0 0.5rem;
+			color: #299fb5;
+			line-height: 1.2;
+			text-align: center;
+		}
+		.rentals-flyer__title-accent { color: #299fb5; }
+		.rentals-flyer__desc {
+			font-size: 0.95rem;
+			color: #1a1a1a;
+			margin: 0 0 0.75rem;
+			line-height: 1.5;
+			text-align: center;
+		}
+		.rentals-flyer__season { margin-bottom: 1rem; }
+		.rentals-flyer__season-bar {
+			background: #299fb5;
+			color: #fff;
+			padding: 0.5rem 0.75rem;
+			font-size: 0.85rem;
+			font-weight: 700;
+			letter-spacing: 0.05em;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 0.75rem;
+			text-align: center;
+		}
+		.rentals-flyer__season-dates { font-weight: 600; opacity: 0.95; }
+		.rentals-flyer__table-wrap { overflow-x: auto; }
+		.rentals-flyer__table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.85rem;
+		}
+		.rentals-flyer__table th,
+		.rentals-flyer__table td {
+			padding: 0.4rem 0.5rem;
+			text-align: center;
+			border: 1px solid #e5e7eb;
+		}
+		.rentals-flyer__table th:first-child,
+		.rentals-flyer__table td:first-child {
+			text-align: left;
+			background: #f3f4f6;
+			font-weight: 500;
+			color: #374151;
+		}
+		.rentals-flyer__table th {
+			background: #f3f4f6;
+			font-weight: 600;
+			color: #1f2937;
+		}
+		.rentals-flyer__table td:not(:first-child) { background: #f9fafb; }
+		.rentals-flyer__inclusions {
+			background: #299fb5;
+			color: #fff;
+			padding: 0.5rem 0.75rem;
+			font-size: 0.85rem;
+			font-weight: 600;
+			margin-top: 1rem;
+			text-align: center;
+		}
+		.rentals-flyer__book-wrap { text-align: center; margin-top: 1.25rem; }
+		.rentals-flyer__book-btn {
+			display: inline-block;
+			background-color: #299fb5;
+			color: #fff;
+			padding: 0.65rem 1.5rem;
+			font-size: 0.9rem;
+			font-weight: 600;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			text-decoration: none;
+			border-radius: 6px;
+			transition: background-color 0.2s ease;
+		}
+		.rentals-flyer__book-btn:hover { background-color: #238a9e; }
+		.rentals-flyer__sidebar {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1rem;
+		}
+		.rentals-flyer__sidebar-card { border-radius: 8px; overflow: hidden; }
+		.rentals-flyer__sidebar-label {
+			display: block;
+			padding: 0.35rem 0.5rem;
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: #1a1a1a;
+			background: #fff;
+			text-align: center;
+		}
+		.rentals-flyer__sidebar-img {
+			height: 140px;
+			background: #ffffff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: hidden;
+		}
+		.rentals-flyer__sidebar-img img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+		}
+		@media (max-width: 900px) {
+			.rentals-flyer__sidebar { grid-template-columns: repeat(2, 1fr); }
+		}
+		@media (max-width: 500px) {
+			.rentals-flyer__sidebar { grid-template-columns: 1fr; }
+		}
+	</style>
+</PublicLayout>

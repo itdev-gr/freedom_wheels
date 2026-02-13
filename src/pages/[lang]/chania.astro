@@ -1,0 +1,153 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import en from '../../locales/en';
+import el from '../../locales/el';
+
+export function getStaticPaths() {
+	return [{ params: { lang: 'en' } }, { params: { lang: 'el' } }];
+}
+
+const { lang } = Astro.params;
+if (lang !== 'en' && lang !== 'el') {
+	return Astro.redirect('/en');
+}
+
+const t = lang === 'el' ? el : en;
+const site = Astro.site ?? new URL(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/logos/logo.webp', site).href;
+---
+
+<PublicLayout lang={lang} title={t.chania.title} description={t.chania.description} canonical={canonical} ogImage={ogImage} t={t}>
+	<section class="chania-hero">
+		<img src="/images/chania-scooter-sea.png" alt="Explore Chania by scooter with a view of the sea" class="chania-hero__img" />
+	</section>
+
+	<main class="page page--image-top">
+		<section class="discover-chania">
+			<div class="discover-chania__content">
+				<h2 class="discover-chania__title">{t.chania.route1Title}</h2>
+				<p class="discover-chania__text">{t.chania.route1Text}</p>
+				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
+			</div>
+			<div class="discover-chania__media">
+				<img src="/images/chania%20port.jpg" alt="Group with scooters by the sea in Chania" class="discover-chania__img" />
+			</div>
+		</section>
+		<section class="discover-chania discover-chania--reverse">
+			<div class="discover-chania__content">
+				<h2 class="discover-chania__title">{t.chania.route2Title}</h2>
+				<p class="discover-chania__text">{t.chania.route2Text}</p>
+				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
+			</div>
+			<div class="discover-chania__media">
+				<img src="/images/chania-scooter-sea.png" alt="Scooter ride with a view of the sea in Chania" class="discover-chania__img" />
+			</div>
+		</section>
+		<section class="discover-chania">
+			<div class="discover-chania__content">
+				<h2 class="discover-chania__title">{t.chania.route3Title}</h2>
+				<p class="discover-chania__text">{t.chania.route3Text}</p>
+				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
+			</div>
+			<div class="discover-chania__media">
+				<img src="/images/chania%20port.jpg" alt="Group with scooters by the sea in Chania" class="discover-chania__img" />
+			</div>
+		</section>
+		<section class="discover-chania discover-chania--reverse">
+			<div class="discover-chania__content">
+				<h2 class="discover-chania__title">{t.chania.route4Title}</h2>
+				<p class="discover-chania__text">{t.chania.route4Text}</p>
+				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
+			</div>
+			<div class="discover-chania__media">
+				<img src="/images/chania-scooter-sea.png" alt="Scooter ride with a view of the sea in Chania" class="discover-chania__img" />
+			</div>
+		</section>
+	</main>
+
+	<style is:global>
+		.page { padding-top: 70px; }
+		.page--image-top { padding-top: 0; }
+		.chania-hero {
+			width: 100%;
+			height: 76.5vh;
+			max-height: 76.5vh;
+			overflow: hidden;
+		}
+		.chania-hero__img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+		.discover-chania {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			min-height: 0;
+		}
+		.discover-chania__content {
+			background: #fff;
+			padding: 3rem 2.5rem;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+		}
+		.discover-chania__title {
+			font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+			font-weight: 700;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			color: #1a1a1a;
+			margin: 0 0 1.5rem;
+			line-height: 1.2;
+		}
+		.discover-chania__text {
+			max-width: 420px;
+			font-size: 0.95rem;
+			line-height: 1.65;
+			color: #333;
+			margin: 0 0 2rem;
+		}
+		.discover-chania__btn {
+			display: inline-block;
+			padding: 0.75rem 1.75rem;
+			background-color: #f0ebe0;
+			color: #1a1a1a;
+			border: 1px solid #1a1a1a;
+			border-radius: 6px;
+			font-size: 0.9rem;
+			font-weight: 600;
+			letter-spacing: 0.05em;
+			text-decoration: none;
+			transition: background-color 0.2s ease, border-color 0.2s ease;
+		}
+		.discover-chania__btn:hover {
+			background-color: #e8e2d6;
+			border-color: #333;
+		}
+		.discover-chania__media {
+			overflow: hidden;
+			min-height: 320px;
+		}
+		.discover-chania__img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			min-height: 320px;
+		}
+		.discover-chania--reverse .discover-chania__content { order: 2; }
+		.discover-chania--reverse .discover-chania__media { order: 1; }
+		@media (max-width: 768px) {
+			.discover-chania { grid-template-columns: 1fr; }
+			.discover-chania__content { order: 1; }
+			.discover-chania__media { order: 2; min-height: 280px; }
+			.discover-chania__img { min-height: 280px; }
+			.discover-chania--reverse .discover-chania__content { order: 1; }
+			.discover-chania--reverse .discover-chania__media { order: 2; }
+		}
+	</style>
+</PublicLayout>

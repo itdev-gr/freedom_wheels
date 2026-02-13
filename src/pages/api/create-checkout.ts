@@ -30,6 +30,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 			totalEur?: number;
 			totalDays?: number;
 			notes?: string;
+			/** Language path segment: 'en' or 'el' for success/cancel URLs */
+			lang?: string;
 		};
 
 		const totalEur = Number(body.totalEur) || 0;
@@ -39,6 +41,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 		const totalDays = Number(body.totalDays) || 1;
 
 		const origin = url.origin;
+		const lang = body.lang === 'el' ? 'el' : 'en';
+		const checkoutPath = `/${lang}/checkout`;
 
 		const session = await stripe.checkout.sessions.create({
 			mode: 'payment',
@@ -68,8 +72,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 				notes: String(body.notes ?? '').trim(),
 			},
 			customer_email: body.email ? String(body.email).trim() : undefined,
-			success_url: `${origin}/checkout?success=1&session_id={CHECKOUT_SESSION_ID}`,
-			cancel_url: `${origin}/checkout`,
+			success_url: `${origin}${checkoutPath}?success=1&session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${origin}${checkoutPath}`,
 		});
 
 		return json({ url: session.url });

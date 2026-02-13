@@ -1,0 +1,185 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import en from '../../locales/en';
+import el from '../../locales/el';
+
+export function getStaticPaths() {
+	return [{ params: { lang: 'en' } }, { params: { lang: 'el' } }];
+}
+
+const { lang } = Astro.params;
+if (lang !== 'en' && lang !== 'el') {
+	return Astro.redirect('/en');
+}
+
+const t = lang === 'el' ? el : en;
+const site = Astro.site ?? new URL(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/logos/logo.webp', site).href;
+---
+
+<PublicLayout lang={lang} title={t.book.title} description={t.book.description} canonical={canonical} ogImage={ogImage} t={t}>
+	<section class="book-hero">
+		<img src="/images/book-mopeds.png" alt="Couples enjoying a moped ride on a scenic road in Crete" class="book-hero__img" />
+	</section>
+
+	<main class="page page--image-top">
+		<section class="book-cards">
+			<div class="book-cards__inner">
+				<article class="book-card">
+					<div class="book-card__img-wrap">
+						<img src="/images/sh-125.png" alt="SH 125cc" class="book-card__img" />
+					</div>
+					<h3 class="book-card__title">SH 125cc</h3>
+					<ul class="book-card__features">
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature3}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature4}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature5}</li>
+					</ul>
+					<a href={`/${lang}/booking?model=sh-125`} class="book-card__btn" target="_blank" rel="noopener noreferrer">{t.book.bookNow}</a>
+				</article>
+				<article class="book-card">
+					<div class="book-card__img-wrap">
+						<img src="/images/liberty-125.png" alt="LIBERTY 125cc" class="book-card__img" />
+					</div>
+					<h3 class="book-card__title">LIBERTY 125cc</h3>
+					<ul class="book-card__features">
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature3}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature4}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature5}</li>
+					</ul>
+					<a href={`/${lang}/booking?model=liberty-125`} class="book-card__btn" target="_blank" rel="noopener noreferrer">{t.book.bookNow}</a>
+				</article>
+				<article class="book-card">
+					<div class="book-card__img-wrap">
+						<img src="/images/sim-200.png" alt="SIM 200cc" class="book-card__img" />
+					</div>
+					<h3 class="book-card__title">SIM 200cc</h3>
+					<ul class="book-card__features">
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature3}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature4}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature5}</li>
+					</ul>
+					<a href={`/${lang}/booking?model=sim-200`} class="book-card__btn" target="_blank" rel="noopener noreferrer">{t.book.bookNow}</a>
+				</article>
+				<article class="book-card">
+					<div class="book-card__img-wrap">
+						<img src="/images/voge-rally-300.png" alt="VOGE RALLY 300cc" class="book-card__img" />
+					</div>
+					<h3 class="book-card__title">VOGE RALLY 300cc</h3>
+					<ul class="book-card__features">
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature3}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature4}</li>
+						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature5}</li>
+					</ul>
+					<a href={`/${lang}/booking?model=voge-rally-300`} class="book-card__btn" target="_blank" rel="noopener noreferrer">{t.book.bookNow}</a>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<style is:global>
+		.page { padding-top: 70px; }
+		.page--image-top { padding-top: 0; }
+		.book-hero {
+			width: 100%;
+			height: 76.5vh;
+			max-height: 76.5vh;
+			overflow: hidden;
+		}
+		.book-hero__img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+		.book-cards {
+			background: #f8f9fa;
+			padding: 3rem 2rem 4rem;
+		}
+		.book-cards__inner {
+			max-width: 1200px;
+			margin: 0 auto;
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1.5rem;
+		}
+		.book-card {
+			background: #fff;
+			border-radius: 12px;
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+			padding: 1.5rem;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		.book-card__img-wrap {
+			width: 100%;
+			height: 170px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-bottom: 1rem;
+		}
+		.book-card__img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+		}
+		.book-card__title {
+			font-size: 1.1rem;
+			font-weight: 700;
+			color: #1a1a1a;
+			margin: 0 0 1rem;
+			text-align: center;
+		}
+		.book-card__features {
+			list-style: none;
+			margin: 0 0 1.25rem;
+			padding: 0;
+			width: 100%;
+		}
+		.book-card__features li {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.9rem;
+			color: #555;
+			margin-bottom: 0.4rem;
+		}
+		.book-card__check {
+			color: #22c55e;
+			font-weight: 700;
+			flex-shrink: 0;
+		}
+		.book-card__btn {
+			display: block;
+			width: 100%;
+			text-align: center;
+			padding: 0.75rem 1rem;
+			background: #1d8299;
+			color: #fff;
+			font-size: 0.95rem;
+			font-weight: 600;
+			text-decoration: none;
+			border-radius: 8px;
+			transition: background-color 0.2s ease;
+		}
+		.book-card__btn:hover { background: #176b7d; }
+		@media (max-width: 900px) {
+			.book-cards__inner { grid-template-columns: repeat(2, 1fr); }
+		}
+		@media (max-width: 500px) {
+			.book-cards__inner { grid-template-columns: 1fr; }
+		}
+	</style>
+</PublicLayout>
