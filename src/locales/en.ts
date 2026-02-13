@@ -2,6 +2,7 @@ export type Locale = typeof en;
 
 const en = {
 	nav: {
+		home: 'Home',
 		rentals: 'Rentals',
 		chania: 'Chania',
 		aboutUs: 'About us',

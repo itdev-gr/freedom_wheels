@@ -224,14 +224,19 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 		.rentals-flyer__table-wrap { overflow-x: auto; }
 		.rentals-flyer__table {
 			width: 100%;
+			table-layout: fixed;
 			border-collapse: collapse;
 			font-size: 0.85rem;
 		}
 		.rentals-flyer__table th,
 		.rentals-flyer__table td {
-			padding: 0.4rem 0.5rem;
+			width: 12.5%;
+			box-sizing: border-box;
+			padding: 0.5rem 0.5rem;
+			height: 2.5rem;
 			text-align: center;
 			border: 1px solid #e5e7eb;
+			vertical-align: middle;
 		}
 		.rentals-flyer__table th:first-child,
 		.rentals-flyer__table td:first-child {

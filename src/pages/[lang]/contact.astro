@@ -135,6 +135,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			transform: translateY(15.3vh);
 		}
 		.contact-cards {
 			display: grid;
@@ -264,7 +265,10 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 		}
 		@media (max-width: 900px) {
 			.contact-cards { grid-template-columns: repeat(2, 1fr); }
-			.contact-form-wrap__inner { grid-template-columns: 1fr; }
+			.contact-form-wrap__inner {
+				grid-template-columns: 1fr;
+				transform: translateY(15%);
+			}
 		}
 		@media (max-width: 500px) {
 			.contact-cards { grid-template-columns: 1fr; }

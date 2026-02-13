@@ -2,6 +2,7 @@ import type { Locale } from './en';
 
 const el: Locale = {
 	nav: {
+		home: 'Αρχική',
 		rentals: 'Ενοικιάσεις',
 		chania: 'Χανιά',
 		aboutUs: 'Σχετικά',

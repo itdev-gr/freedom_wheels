@@ -53,10 +53,15 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 				<a href={lang === 'en' ? '/en' : '/el'} class="logo">
 					<img src="/logos/logo.webp" alt="Freedom Wheels" class="logo__image" />
 				</a>
+				<button type="button" class="nav-bar__hamburger" id="nav-bar__hamburger" aria-label="Menu" aria-expanded="false">
+					<span class="nav-bar__hamburger-line"></span>
+					<span class="nav-bar__hamburger-line"></span>
+					<span class="nav-bar__hamburger-line"></span>
+				</button>
 				<nav class="nav-bar__links">
+					<a href={lang === 'en' ? '/en' : '/el'} class="nav-bar__link">{t.nav.home}</a>
 					<a href={lang === 'en' ? '/en/rentals' : '/el/rentals'} class="nav-bar__link">{t.nav.rentals}</a>
 					<a href={lang === 'en' ? '/en/chania' : '/el/chania'} class="nav-bar__link">{t.nav.chania}</a>
-					<a href={lang === 'en' ? '/en/about' : '/el/about'} class="nav-bar__link">{t.nav.aboutUs}</a>
 					<a href={lang === 'en' ? '/en/contact' : '/el/contact'} class="nav-bar__link">{t.nav.contact}</a>
 					<a href={lang === 'en' ? '/en/book' : '/el/book'} class="nav-bar__cta">{t.nav.bookNow}</a>
 					<span class="nav-bar__lang">
@@ -73,6 +78,26 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 						)}
 					</span>
 				</nav>
+			</div>
+			<div class="nav-bar__mobile-panel" id="nav-bar__mobile-panel" hidden>
+				<a href={lang === 'en' ? '/en' : '/el'} class="nav-bar__mobile-link">{t.nav.home}</a>
+				<a href={lang === 'en' ? '/en/rentals' : '/el/rentals'} class="nav-bar__mobile-link">{t.nav.rentals}</a>
+				<a href={lang === 'en' ? '/en/chania' : '/el/chania'} class="nav-bar__mobile-link">{t.nav.chania}</a>
+				<a href={lang === 'en' ? '/en/contact' : '/el/contact'} class="nav-bar__mobile-link">{t.nav.contact}</a>
+				<a href={lang === 'en' ? '/en/book' : '/el/book'} class="nav-bar__mobile-cta">{t.nav.bookNow}</a>
+				<span class="nav-bar__mobile-lang">
+					{lang === 'en' ? (
+						<>
+							<span class="nav-bar__lang-current">En</span>
+							<a href={otherPath} class="nav-bar__lang-link" aria-label="Ελληνικά">Gr</a>
+						</>
+					) : (
+						<>
+							<a href={otherPath} class="nav-bar__lang-link" aria-label="English">En</a>
+							<span class="nav-bar__lang-current">Gr</span>
+						</>
+					)}
+				</span>
 			</div>
 		</header>
 
@@ -109,7 +134,6 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 						<li><a href={lang === 'en' ? '/en#cookies' : '/el#cookies'}>{t.footer.cookiePolicy}</a></li>
 						<li><a href={lang === 'en' ? '/en#terms-use' : '/el#terms-use'}>{t.footer.termsOfUse}</a></li>
 						<li><a href={lang === 'en' ? '/en#privacy' : '/el#privacy'}>{t.footer.privacyPolicy}</a></li>
-						<li><a href={lang === 'en' ? '/en#payment' : '/el#payment'}>{t.footer.paymentMethods}</a></li>
 						<li><a href={lang === 'en' ? '/en/contact' : '/el/contact'}>{t.footer.contact}</a></li>
 					</ul>
 				</div>
@@ -239,6 +263,11 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 			.site-footer__copyright a:hover {
 				text-decoration: underline;
 			}
+			@media (max-width: 900px) {
+				.site-footer {
+					margin-top: 20vh;
+				}
+			}
 			.nav-bar {
 				position: fixed;
 				top: 0;
@@ -331,15 +360,150 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 			.nav-bar__lang-link:hover {
 				background-color: rgba(255, 255, 255, 0.2);
 			}
+			.nav-bar__hamburger {
+				display: none;
+				flex-direction: column;
+				justify-content: center;
+				gap: 5px;
+				width: 44px;
+				height: 44px;
+				padding: 0;
+				border: none;
+				background: rgba(128, 128, 128, 0.85);
+				border-radius: 999px;
+				cursor: pointer;
+				transition: background 150ms ease-out;
+			}
+			.nav-bar__hamburger:hover {
+				background: rgba(100, 100, 100, 0.95);
+			}
+			.nav-bar__hamburger-line {
+				display: block;
+				width: 22px;
+				height: 2px;
+				background: #fff;
+				border-radius: 1px;
+				margin: 0 auto;
+				transition: transform 150ms ease-out, opacity 150ms ease-out;
+			}
+			.nav-bar--menu-open .nav-bar__hamburger-line:nth-child(1) {
+				transform: translateY(7px) rotate(45deg);
+			}
+			.nav-bar--menu-open .nav-bar__hamburger-line:nth-child(2) {
+				opacity: 0;
+			}
+			.nav-bar--menu-open .nav-bar__hamburger-line:nth-child(3) {
+				transform: translateY(-7px) rotate(-45deg);
+			}
+			.nav-bar__mobile-panel {
+				display: none;
+				flex-direction: column;
+				gap: 0.5rem;
+				padding: 1rem 1rem 1.5rem;
+				background-color: rgba(85, 83, 86, 0.5);
+				backdrop-filter: blur(8px);
+				border-top: 1px solid rgba(255, 255, 255, 0.15);
+			}
+			.nav-bar__mobile-link,
+			.nav-bar__mobile-cta {
+				display: block;
+				padding: 0.5rem 1rem;
+				border-radius: 999px;
+				color: #ffffff;
+				text-decoration: none;
+				font-size: 0.75rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				text-align: center;
+				transition: background 150ms ease-out;
+			}
+			.nav-bar__mobile-link {
+				background: rgba(128, 128, 128, 0.85);
+				font-weight: 500;
+			}
+			.nav-bar__mobile-link:hover {
+				background: rgba(100, 100, 100, 0.95);
+				color: #ffffff;
+			}
+			.nav-bar__mobile-cta {
+				background: #1a1a1a;
+				font-weight: 600;
+				letter-spacing: 0.14em;
+			}
+			.nav-bar__mobile-cta:hover {
+				background: #333;
+				color: #ffffff;
+			}
+			.nav-bar__mobile-lang {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.35rem;
+				margin-top: 0.5rem;
+				padding-top: 0.75rem;
+				border-top: 1px solid rgba(255, 255, 255, 0.2);
+				font-size: 0.75rem;
+				font-weight: 600;
+				letter-spacing: 0.05em;
+			}
+			.nav-bar__mobile-lang .nav-bar__lang-current {
+				color: rgba(255, 255, 255, 0.6);
+			}
+			.nav-bar__mobile-lang .nav-bar__lang-link {
+				color: #ffffff;
+				padding: 0.25rem 0.5rem;
+				border-radius: 4px;
+			}
+			.nav-bar__mobile-lang .nav-bar__lang-link:hover {
+				background: rgba(255, 255, 255, 0.2);
+			}
 			@media (max-width: 900px) {
-				.nav-bar__links .nav-bar__link,
-				.nav-bar__links .nav-bar__cta {
+				.nav-bar__links {
 					display: none;
 				}
-				.nav-bar__lang {
-					display: inline-flex;
+				.nav-bar__hamburger {
+					display: flex;
+				}
+				.nav-bar__mobile-panel {
+					display: none;
+				}
+				.nav-bar--menu-open .nav-bar__mobile-panel {
+					display: flex;
+				}
+			}
+			@media (min-width: 901px) {
+				.nav-bar__mobile-panel {
+					display: none !important;
 				}
 			}
 		</style>
+		<script>
+			(function () {
+				const header = document.getElementById('nav-bar');
+				const hamburger = document.getElementById('nav-bar__hamburger');
+				const panel = document.getElementById('nav-bar__mobile-panel');
+				const mobileLinks = panel?.querySelectorAll('.nav-bar__mobile-link, .nav-bar__mobile-cta, .nav-bar__lang-link');
+				function openMenu() {
+					if (!header) return;
+					header.classList.add('nav-bar--menu-open');
+					hamburger?.setAttribute('aria-expanded', 'true');
+					panel?.removeAttribute('hidden');
+					document.body.style.overflow = 'hidden';
+				}
+				function closeMenu() {
+					if (!header) return;
+					header.classList.remove('nav-bar--menu-open');
+					hamburger?.setAttribute('aria-expanded', 'false');
+					panel?.setAttribute('hidden', '');
+					document.body.style.overflow = '';
+				}
+				function toggleMenu() {
+					if (header?.classList.contains('nav-bar--menu-open')) closeMenu();
+					else openMenu();
+				}
+				hamburger?.addEventListener('click', toggleMenu);
+				mobileLinks?.forEach((link) => link.addEventListener('click', closeMenu));
+			})();
+		</script>
 	</body>
 </html>
