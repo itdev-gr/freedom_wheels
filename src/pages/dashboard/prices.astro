@@ -7,7 +7,10 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 	<div class="dash-card">
 		<p>Prices per day by scooter and season. Rows: 1–7 days. Save updates all visible cells.</p>
 		<div id="prices-container">Loading…</div>
-		<button type="button" class="dash-btn" id="prices-save" style="margin-top: 1rem;">Save all</button>
+		<div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+			<button type="button" class="dash-btn" id="prices-save">Save all</button>
+			<button type="button" class="dash-btn" id="prices-init">Initialize prices</button>
+		</div>
 		<p id="prices-msg" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;"></p>
 	</div>
 	<script>
@@ -21,6 +24,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 		(async () => {
 			const container = document.getElementById('prices-container');
 			const saveBtn = document.getElementById('prices-save');
+			const initBtn = document.getElementById('prices-init');
 			const msg = document.getElementById('prices-msg');
 
 			const res = await fetch('/api/prices', { credentials: 'include' });
@@ -71,6 +75,30 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
 				});
 				if (putRes.ok) msg.textContent = 'Saved.';
 				else msg.textContent = 'Failed to save.';
+			});
+
+			initBtn?.addEventListener('click', async () => {
+				const items: { scooter_id: string; season: string; days: number; price_eur: number }[] = [];
+				for (const scooter of SCOOTERS) {
+					for (const season of SEASONS) {
+						for (let days = 1; days <= 7; days++) {
+							items.push({ scooter_id: scooter.id, season, days, price_eur: 0 });
+						}
+					}
+				}
+				msg.textContent = '';
+				const putRes = await fetch('/api/prices', {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify(items),
+				});
+				if (putRes.ok) {
+					msg.textContent = 'Prices initialized. You can edit the grid and click Save all.';
+					location.reload();
+				} else {
+					msg.textContent = 'Failed to initialize.';
+				}
 			});
 		})();
 	</script>
