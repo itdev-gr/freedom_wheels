@@ -1,5 +1,6 @@
 ---
 export const prerender = false;
+import { getDb } from '../lib/firebase';
 
 const title = 'Rentals | Freedom Wheels – Scooter Rental Chania';
 const description = 'Rent a scooter in Chania with Freedom Wheels. Well-maintained scooters for exploring the old town, harbour and coast. Helmets included. Contact us for rates and availability.';
@@ -8,11 +9,21 @@ const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 
 let prices: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
 try {
-	const base = Astro.url.origin;
-	const r = await fetch(`${base}/api/prices`);
-	if (r.ok) prices = await r.json();
+	const db = getDb();
+	if (db) {
+		const priceSnap = await db.collection('prices').get();
+		prices = priceSnap.docs.map((d) => {
+			const data = d.data();
+			return {
+				scooter_id: data.scooterId,
+				season: data.season,
+				days: data.days,
+				price_eur: data.priceEur,
+			};
+		});
+	}
 } catch {
-	// fallback below
+	// leave prices empty
 }
 
 const SCOOTER_ROWS = [
@@ -27,26 +38,9 @@ function getPrice(season: string, scooterId: string, days: number): number {
 	return row?.price_eur ?? 0;
 }
 
-// Fallback when API has no data
-const HIGH_FALLBACK: Record<string, number[]> = {
-	'liberty-125': [35, 66, 93, 116, 135, 150, 161],
-	'sh-125': [35, 66, 93, 116, 135, 150, 161],
-	'sim-200': [45, 86, 123, 156, 185, 210, 231],
-	'voge-rally-300': [55, 106, 153, 196, 235, 270, 301],
-};
-const LOW_FALLBACK: Record<string, number[]> = {
-	'liberty-125': [25, 46, 63, 76, 85, 90, 105],
-	'sh-125': [25, 46, 63, 76, 85, 90, 105],
-	'sim-200': [35, 66, 93, 116, 135, 150, 161],
-	'voge-rally-300': [45, 86, 123, 156, 185, 210, 231],
-};
-
-function getPriceOrFallback(season: string, scooterId: string, dayIndex: number): number {
-	const days = dayIndex + 1;
+function formatPrice(season: string, scooterId: string, days: number): number | string {
 	const p = getPrice(season, scooterId, days);
-	if (p > 0) return p;
-	const fallback = season === 'high' ? HIGH_FALLBACK : LOW_FALLBACK;
-	return fallback[scooterId]?.[dayIndex] ?? 0;
+	return p > 0 ? p : '—';
 }
 ---
 <html lang="en">
@@ -143,8 +137,8 @@ function getPriceOrFallback(season: string, scooterId: string, dayIndex: number)
 										{SCOOTER_ROWS.map((s) => (
 											<tr>
 												<td>{s.label}</td>
-												{[0, 1, 2, 3, 4, 5, 6].map((i) => (
-													<td>{getPriceOrFallback('high', s.id, i)}</td>
+												{[1, 2, 3, 4, 5, 6, 7].map((days) => (
+													<td>{formatPrice('high', s.id, days)}</td>
 												))}
 											</tr>
 										))}
@@ -173,8 +167,8 @@ function getPriceOrFallback(season: string, scooterId: string, dayIndex: number)
 										{SCOOTER_ROWS.map((s) => (
 											<tr>
 												<td>{s.label}</td>
-												{[0, 1, 2, 3, 4, 5, 6].map((i) => (
-													<td>{getPriceOrFallback('low', s.id, i)}</td>
+												{[1, 2, 3, 4, 5, 6, 7].map((days) => (
+													<td>{formatPrice('low', s.id, days)}</td>
 												))}
 											</tr>
 										))}

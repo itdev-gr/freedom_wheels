@@ -7,11 +7,11 @@ const description = 'Send your scooter rental booking request to Freedom Wheels 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/logos/logo.webp', Astro.site).href;
 
-const SCOOTERS: Record<string, { image: string; title: string; subtitle: string; basePricePerDay: number }> = {
-	'sh-125': { image: '/images/sh-125.png', title: 'HONDA SH 125 2024', subtitle: 'SH 125', basePricePerDay: 35 },
-	'liberty-125': { image: '/images/liberty-125.png', title: 'PIAGGIO LIBERTY 125 2025', subtitle: 'LIBERTY 125', basePricePerDay: 35 },
-	'sim-200': { image: '/images/sim-200.png', title: 'SYM SIM 200 2025', subtitle: 'SIM 200', basePricePerDay: 45 },
-	'voge-rally-300': { image: '/images/voge-rally-300.png', title: 'VOGE RALLY 300 2024', subtitle: 'VOGE RALLY 300', basePricePerDay: 55 },
+const SCOOTERS: Record<string, { image: string; title: string; subtitle: string }> = {
+	'sh-125': { image: '/images/sh-125.png', title: 'HONDA SH 125 2024', subtitle: 'SH 125' },
+	'liberty-125': { image: '/images/liberty-125.png', title: 'PIAGGIO LIBERTY 125 2025', subtitle: 'LIBERTY 125' },
+	'sim-200': { image: '/images/sim-200.png', title: 'SYM SIM 200 2025', subtitle: 'SIM 200' },
+	'voge-rally-300': { image: '/images/voge-rally-300.png', title: 'VOGE RALLY 300 2024', subtitle: 'VOGE RALLY 300' },
 };
 const modelParam = Astro.url.searchParams.get('model') ?? 'liberty-125';
 const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
@@ -199,7 +199,7 @@ if (locations.length === 0) {
 								<strong>Total price</strong>
 								<strong id="summary-total">—</strong>
 							</div>
-							<div id="booking-data" data-base-price={scooter.basePricePerDay} data-days="1" data-model={modelParam} data-scooter-title={scooter.title} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} hidden></div>
+							<div id="booking-data" data-days="1" data-model={modelParam} data-scooter-title={scooter.title} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} hidden></div>
 							<button type="button" id="continue-booking-btn" class="booking-cta">Continue Booking</button>
 						</div>
 					</div>
@@ -833,7 +833,6 @@ if (locations.length === 0) {
 		<script is:inline>
 			(function () {
 				const data = document.getElementById('booking-data');
-				const basePrice = Number(data?.getAttribute('data-base-price')) || 0;
 				const model = data?.getAttribute('data-model') || '';
 				let pricesMatrix = [];
 				let locationsList = [];
@@ -938,29 +937,26 @@ if (locations.length === 0) {
 						if (loc.id === returnLocId && loc.price_eur != null && returnLocId !== pickupLocId) locPrice += Number(loc.price_eur);
 					});
 					var season = pickupInput?.value ? getSeason(pickupInput.value) : 'high';
-					var baseTotal;
+					var baseTotal = NaN;
 					if (days <= 7) {
 						var matrixPrice = getPriceFromMatrix(model, season, days);
-						baseTotal = !isNaN(matrixPrice) ? matrixPrice : basePrice * days;
+						if (!isNaN(matrixPrice)) baseTotal = matrixPrice;
 					} else {
 						var price7 = getPriceFromMatrix(model, season, 7);
 						if (!isNaN(price7) && price7 > 0) {
 							var dailyRate = price7 / 7;
 							var extraDays = days - 7;
 							baseTotal = price7 + (dailyRate * extraDays);
-						} else {
-							baseTotal = basePrice * days;
 						}
 					}
-					// Dynamic base price from matrix (1-day price for current season)
 					var basePriceEl = document.querySelector('.booking-summary__base-price');
 					var dayOnePrice = getPriceFromMatrix(model, season, 1);
-					if (basePriceEl) basePriceEl.textContent = !isNaN(dayOnePrice) ? formatEur(dayOnePrice) : formatEur(basePrice);
-					var total = baseTotal + insuranceTotal + locPrice;
+					if (basePriceEl) basePriceEl.textContent = !isNaN(dayOnePrice) ? formatEur(dayOnePrice) : '—';
+					var total = (isNaN(baseTotal) ? NaN : baseTotal + insuranceTotal + locPrice);
 					insuranceEl.textContent = formatEur(perDay);
 					insuranceTotalEl.textContent = formatEur(insuranceTotal);
 					if (locationsEl) locationsEl.textContent = formatEur(locPrice);
-					totalEl.textContent = formatEur(total);
+					totalEl.textContent = isNaN(total) ? '—' : formatEur(total);
 				}
 
 				setMinDates();
