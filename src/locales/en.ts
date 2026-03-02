@@ -54,6 +54,7 @@ const en = {
 		days: 'DAYS',
 		inclusions: 'Helmet x2: Free • Phone Holder: Free • Back bag: Free • Standard Insurance',
 		bookNow: 'Book now',
+		cancellation: 'Cancellations made less than 48 hours before the booking are subject to a 25% cancellation fee.',
 	},
 	chania: {
 		title: 'Discover Chania | Freedom Wheels – Scooter Rental Chania',
@@ -66,6 +67,10 @@ const en = {
 		route3Text: 'A 25 km journey along a pleasant asphalt road, with the White Mountains stretching out on the right and views over Georgioupoli Bay on the left. After Georgioupoli, stop at the lake to explore its rich flora and fauna by pedalo, then continue toward Argyroupoli via Kournas village, surrounded by lush greenery and freshwater waterfalls.',
 		route4Title: 'Vamos - Kalamitsi Aleksandrou - Vrises - Alikambos - Vafes – Tzitzifes - Fres - Pemonia - Kania - Vamos',
 		route4Text: 'A 28 km easy asphalt route through traditional villages and lush green forest roads. Enjoy a stop in Vrisses for Greek yogurt with honey under the large plane trees by the river, followed by wine tasting at Dourakis, one of the finest Cretan wine producers, in Alikampos. The route continues through the unspoiled villages of Vafes and Tzitzifes, ending with a relaxing coffee in the beautiful square of Fre.',
+		route5Title: 'Elafonissos',
+		route5Text: 'Elafonissos is one of the most famous beaches in Crete and all of Greece. Located on the southwestern tip of the island, it features exotic pink-white sand and crystal-clear turquoise waters that rival any Caribbean beach. The shallow lagoon-like waters make it perfect for wading and relaxing. A must-visit destination for anyone exploring Chania by scooter — the scenic ride through mountain villages and gorges is an adventure in itself.',
+		route6Title: 'Falasarna',
+		route6Text: 'Falasarna is one of the most stunning beaches on the western coast of Crete, famous for its wide stretch of golden sand and breathtaking sunsets. The crystal-clear waters and unspoiled coastline make it a favourite among locals and travellers alike. Surrounded by rugged hills and ancient ruins, it offers the perfect blend of natural beauty and history. An unforgettable ride from Chania through scenic countryside roads — ideal for a full-day scooter adventure.',
 		bookNow: 'Book Now',
 	},
 	about: {
@@ -156,6 +161,8 @@ const en = {
 		totalAmount: 'Total Amount',
 		payOnDelivery: 'Pay on Delivery',
 		onlinePayment: 'Online Payment',
+		licenceConfirm: 'I confirm that I hold a valid A1 driving licence (or equivalent)',
+		licenceError: 'You must confirm that you hold a valid A1 driving licence to proceed.',
 		bookingConfirmed: 'Booking Confirmed!',
 		thankYou: 'Thank you for your booking. We will contact you shortly to confirm all the details.',
 		backToHome: 'Back to Home',

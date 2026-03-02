@@ -48,6 +48,12 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 						<label for="phone">{t.checkout.phone} <span class="required">*</span></label>
 						<input type="tel" id="phone" name="phone" placeholder="+30 69..." required />
 					</div>
+					<div class="checkout-field checkout-field--checkbox">
+						<label class="checkout-checkbox">
+							<input type="checkbox" id="licence-confirm" />
+							<span>{t.checkout.licenceConfirm} <span class="required">*</span></span>
+						</label>
+					</div>
 					<div class="checkout-field">
 						<label for="notes">{t.checkout.notes} <span class="optional">{t.checkout.notesOptional}</span></label>
 						<textarea id="notes" name="notes" rows="3" placeholder="Any special requests or information..."></textarea>
@@ -91,7 +97,6 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<div id="checkout-error" class="checkout-error" style="display:none;"></div>
 
 				<div class="checkout-actions">
-					<button type="button" id="btn-pay-delivery" class="checkout-btn checkout-btn--secondary">{t.checkout.payOnDelivery}</button>
 					<button type="button" id="btn-pay-online" class="checkout-btn checkout-btn--primary">{t.checkout.onlinePayment}</button>
 				</div>
 			</div>
@@ -162,6 +167,24 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			box-shadow: 0 0 0 2px rgba(29, 130, 153, 0.2);
 		}
 		.checkout-field textarea { resize: vertical; }
+		.checkout-field--checkbox { margin-bottom: 1rem; }
+		.checkout-checkbox {
+			display: flex;
+			align-items: flex-start;
+			gap: 0.5rem;
+			font-size: 0.9rem;
+			font-weight: 400;
+			color: #333;
+			cursor: pointer;
+		}
+		.checkout-checkbox input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			margin-top: 2px;
+			flex-shrink: 0;
+			accent-color: var(--color-primary);
+			cursor: pointer;
+		}
 		.checkout-summary__row {
 			display: flex;
 			justify-content: space-between;
@@ -205,12 +228,6 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			color: #fff;
 		}
 		.checkout-btn--primary:hover:not(:disabled) { background-color: var(--color-primary-dark); }
-		.checkout-btn--secondary {
-			background-color: #fff;
-			color: var(--color-primary);
-			border: 2px solid var(--color-primary);
-		}
-		.checkout-btn--secondary:hover:not(:disabled) { background-color: rgba(29, 130, 153, 0.08); }
 		.checkout-error {
 			background: #fff5f5;
 			color: #c53030;
@@ -344,61 +361,15 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				if (!form.name) { showError('Please enter your full name.'); return null; }
 				if (!form.email) { showError('Please enter your email address.'); return null; }
 				if (!form.phone) { showError('Please enter your phone number.'); return null; }
+				var licenceBox = document.getElementById('licence-confirm');
+				if (licenceBox && !licenceBox.checked) {
+					showError(lang === 'el'
+						? 'Πρέπει να επιβεβαιώσετε ότι κατέχετε έγκυρο δίπλωμα οδήγησης A1 για να συνεχίσετε.'
+						: 'You must confirm that you hold a valid A1 driving licence to proceed.');
+					return null;
+				}
 				hideError();
 				return form;
-			}
-
-			function disableButtons(disabled) {
-				var btn1 = document.getElementById('btn-pay-delivery');
-				var btn2 = document.getElementById('btn-pay-online');
-				if (btn1) btn1.disabled = disabled;
-				if (btn2) btn2.disabled = disabled;
-			}
-
-			var deliveryBtn = document.getElementById('btn-pay-delivery');
-			if (deliveryBtn) {
-				deliveryBtn.addEventListener('click', function () {
-					var form = validate();
-					if (!form) return;
-					disableButtons(true);
-					deliveryBtn.textContent = 'Processing...';
-
-					fetch('/api/public-booking', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							customerName: form.name,
-							email: form.email,
-							phone: form.phone,
-							scooterId: booking.model,
-							pickupDate: booking.pickupDate,
-							returnDate: booking.returnDate,
-							pickupLocationId: booking.pickupLocation,
-							returnLocationId: booking.returnLocation,
-							totalEur: booking.totalEur,
-							status: 'Pending',
-							notes: form.notes,
-							paymentMethod: 'delivery',
-						}),
-					})
-						.then(function (res) { return res.json(); })
-						.then(function (data) {
-							if (data.ok) {
-								localStorage.removeItem('fw_checkout');
-								if (formWrapper) formWrapper.style.display = 'none';
-								if (successBanner) successBanner.style.display = 'block';
-							} else {
-								showError(data.error || 'Something went wrong. Please try again.');
-								disableButtons(false);
-								deliveryBtn.textContent = 'Pay on Delivery';
-							}
-						})
-						.catch(function () {
-							showError('Network error. Please try again.');
-							disableButtons(false);
-							deliveryBtn.textContent = 'Pay on Delivery';
-						});
-				});
 			}
 
 			var onlineBtn = document.getElementById('btn-pay-online');
@@ -406,7 +377,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				onlineBtn.addEventListener('click', function () {
 					var form = validate();
 					if (!form) return;
-					disableButtons(true);
+					onlineBtn.disabled = true;
 					onlineBtn.textContent = 'Redirecting...';
 
 					booking.customerName = form.name;
@@ -440,13 +411,13 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 								window.location.href = data.url;
 							} else {
 								showError(data.error || 'Failed to create payment session.');
-								disableButtons(false);
+								onlineBtn.disabled = false;
 								onlineBtn.textContent = 'Online Payment';
 							}
 						})
 						.catch(function () {
 							showError('Network error. Please try again.');
-							disableButtons(false);
+							onlineBtn.disabled = false;
 							onlineBtn.textContent = 'Online Payment';
 						});
 				});

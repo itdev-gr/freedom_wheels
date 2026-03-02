@@ -153,6 +153,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 					</div>
 
 					<div class="rentals-flyer__inclusions">{t.rentals.inclusions}</div>
+					<p class="rentals-flyer__cancellation">{t.rentals.cancellation}</p>
 					<div class="rentals-flyer__book-wrap">
 						<a href={`/${lang}/book`} class="rentals-flyer__book-btn">{t.rentals.bookNow}</a>
 					</div>
@@ -259,6 +260,13 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			font-weight: 600;
 			margin-top: 1rem;
 			text-align: center;
+		}
+		.rentals-flyer__cancellation {
+			font-size: 0.85rem;
+			color: #6b7280;
+			text-align: center;
+			margin: 0.75rem 0 0;
+			font-style: italic;
 		}
 		.rentals-flyer__book-wrap { text-align: center; margin-top: 1.25rem; }
 		.rentals-flyer__book-btn {
