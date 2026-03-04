@@ -1,0 +1,170 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import en from '../../locales/en';
+import el from '../../locales/el';
+
+export function getStaticPaths() {
+	return [{ params: { lang: 'en' } }, { params: { lang: 'el' } }];
+}
+
+const { lang } = Astro.params;
+if (lang !== 'en' && lang !== 'el') {
+	return Astro.redirect('/en');
+}
+
+const t = lang === 'el' ? el : en;
+const site = Astro.site ?? new URL(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/logos/logo.webp', site).href;
+---
+
+<PublicLayout lang={lang} title={t.terms.title} description={t.terms.description} canonical={canonical} ogImage={ogImage} t={t}>
+	<main class="page">
+		<section class="terms-section">
+			<h1 class="terms-page-title">{t.terms.pageTitle}</h1>
+
+			<div class="terms-notices">
+				<h2 class="terms-notices__title">{t.terms.importantNotices}</h2>
+				<ul class="terms-notices__list">
+					<li>{t.terms.noticeHelmet}</li>
+					<li>{t.terms.noticeLostKey}</li>
+					<li>{t.terms.noticeFuel}</li>
+					<li>{t.terms.noticeRoadHelp}</li>
+				</ul>
+			</div>
+
+			<div class="terms-content">
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term1Title}</h3>
+					<p class="terms-item__text">{t.terms.term1Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term2Title}</h3>
+					<p class="terms-item__text">{t.terms.term2Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term3Title}</h3>
+					<p class="terms-item__text">{t.terms.term3Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term4Title}</h3>
+					<p class="terms-item__text">{t.terms.term4Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term5Title}</h3>
+					<p class="terms-item__text">{t.terms.term5Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term6Title}</h3>
+					<p class="terms-item__text">{t.terms.term6Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term7Title}</h3>
+					<p class="terms-item__text">{t.terms.term7Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term8Title}</h3>
+					<p class="terms-item__text">{t.terms.term8Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term9Title}</h3>
+					<p class="terms-item__text">{t.terms.term9Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term10Title}</h3>
+					<p class="terms-item__text">{t.terms.term10Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term11Title}</h3>
+					<p class="terms-item__text">{t.terms.term11Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term12Title}</h3>
+					<p class="terms-item__text">{t.terms.term12Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term13Title}</h3>
+					<p class="terms-item__text">{t.terms.term13Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term14Title}</h3>
+					<p class="terms-item__text">{t.terms.term14Text}</p>
+				</div>
+				<div class="terms-item">
+					<h3 class="terms-item__title">{t.terms.term15Title}</h3>
+					<p class="terms-item__text">{t.terms.term15Text}</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<style is:global>
+		.page { padding-top: 70px; }
+		.terms-section {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2.5rem 1.5rem 4rem;
+		}
+		.terms-page-title {
+			color: #1d8299;
+			font-size: 1.8rem;
+			font-weight: 700;
+			text-align: center;
+			margin: 0 0 2rem;
+		}
+		.terms-notices {
+			background: #f0f9fb;
+			border: 1px solid #c4e6ed;
+			border-radius: 10px;
+			padding: 1.5rem 2rem;
+			margin-bottom: 2.5rem;
+		}
+		.terms-notices__title {
+			color: #1d8299;
+			font-size: 1.15rem;
+			font-weight: 700;
+			margin: 0 0 0.75rem;
+		}
+		.terms-notices__list {
+			margin: 0;
+			padding: 0 0 0 1.25rem;
+			list-style: disc;
+		}
+		.terms-notices__list li {
+			font-size: 0.95rem;
+			line-height: 1.6;
+			color: #333;
+			margin-bottom: 0.35rem;
+		}
+		.terms-notices__list li:last-child { margin-bottom: 0; }
+		.terms-content {
+			display: flex;
+			flex-direction: column;
+			gap: 1.5rem;
+		}
+		.terms-item {
+			padding-bottom: 1.5rem;
+			border-bottom: 1px solid #e5e7eb;
+		}
+		.terms-item:last-child {
+			border-bottom: none;
+			padding-bottom: 0;
+		}
+		.terms-item__title {
+			font-size: 1.05rem;
+			font-weight: 700;
+			color: #1a1a1a;
+			margin: 0 0 0.5rem;
+		}
+		.terms-item__text {
+			font-size: 0.95rem;
+			line-height: 1.65;
+			color: #444;
+			margin: 0;
+		}
+		@media (max-width: 600px) {
+			.terms-section { padding: 1.5rem 1rem 3rem; }
+			.terms-notices { padding: 1.25rem 1.25rem; }
+		}
+	</style>
+</PublicLayout>
