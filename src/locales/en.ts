@@ -221,6 +221,8 @@ const en = {
 		noticeHelmet: 'Wearing a helmet is mandatory.',
 		noticeFuel: 'Running out of fuel incurs a charge of €20.',
 		noticeRoadHelp: 'Unjustified road assistance calls are subject to a charge of €20.',
+		noticeCreditCard: 'I agree to my credit card being charged when I do not have cash, or when I cause damage to the vehicle.',
+		noticeDamage: 'In case of damage to the vehicle due to my responsibility or theft, I agree to my card being charged up to the agreed excess amount.',
 		term1Title: '1. Minimum Rental Duration',
 		term1Text: 'The minimum rental duration is two days. A delay of over 2 hours beyond the agreed return time is charged as an additional day.',
 		term2Title: '2. Reservations',
