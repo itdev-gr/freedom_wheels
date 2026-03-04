@@ -1,8 +1,12 @@
 ---
 export const prerender = false;
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import { verifySession } from '../../lib/auth';
+
+const session = await verifySession(Astro.request);
+if (!session) return Astro.redirect('/login');
 ---
-<DashboardLayout title="Prices">
+<DashboardLayout title="Prices" session={session}>
 	<h1>Prices</h1>
 	<div class="dash-card">
 		<p>Prices per day by scooter and season. Rows: 1–7 days. Save updates all visible cells.</p>

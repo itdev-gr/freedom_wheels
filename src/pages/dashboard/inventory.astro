@@ -1,8 +1,12 @@
 ---
 export const prerender = false;
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import { verifySession } from '../../lib/auth';
+
+const session = await verifySession(Astro.request);
+if (!session) return Astro.redirect('/login');
 ---
-<DashboardLayout title="Inventory">
+<DashboardLayout title="Inventory" session={session}>
 	<h1>Inventory</h1>
 	<div class="dash-card">
 		<p>Set how many of each scooter you have in stock.</p>

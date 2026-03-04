@@ -1,8 +1,12 @@
 ---
 export const prerender = false;
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import { verifySession } from '../../lib/auth';
+
+const session = await verifySession(Astro.request);
+if (!session) return Astro.redirect('/login');
 ---
-<DashboardLayout title="Dashboard">
+<DashboardLayout title="Dashboard" session={session}>
 	<h1>Dashboard</h1>
 	<div class="dash-card">
 		<p>Welcome to the Freedom Wheels dashboard. Use the menu to manage:</p>

@@ -1,8 +1,12 @@
 ---
 export const prerender = false;
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import { verifySession } from '../../lib/auth';
+
+const session = await verifySession(Astro.request);
+if (!session) return Astro.redirect('/login');
 ---
-<DashboardLayout title="Locations">
+<DashboardLayout title="Locations" session={session}>
 	<h1>Locations</h1>
 	<div class="dash-card">
 		<h2 style="margin-top: 0; font-size: 1.1rem;">Add location</h2>

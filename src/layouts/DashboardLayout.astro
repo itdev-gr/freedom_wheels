@@ -1,13 +1,6 @@
 ---
-import { verifySession } from '../lib/auth';
-
-interface Props { title?: string }
-const { title = 'Dashboard' } = Astro.props;
-
-const session = await verifySession(Astro.request);
-if (!session) {
-	return Astro.redirect('/login');
-}
+interface Props { title?: string; session: { uid: string; email: string | null } }
+const { title = 'Dashboard', session } = Astro.props;
 ---
 <html lang="en">
 	<head>
