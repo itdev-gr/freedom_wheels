@@ -44,6 +44,14 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 		<link rel="apple-touch-icon" href="/logos/logo.webp" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<script is:inline>
+		(function() {
+			var script = document.createElement('script');
+			script.src = 'https://cbl.link/b/XoJAKMd.js';
+			script.async = true;
+			document.head.appendChild(script);
+		})();
+		</script>
 		<link rel="alternate" hreflang="en" href={new URL(pathname.replace(/^\/el/, '/en'), site).href} />
 		<link rel="alternate" hreflang="el" href={new URL(pathname.replace(/^\/en/, '/el'), site).href} />
 	</head>

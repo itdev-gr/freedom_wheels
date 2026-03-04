@@ -20,7 +20,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 
 <PublicLayout lang={lang} title={t.book.title} description={t.book.description} canonical={canonical} ogImage={ogImage} t={t}>
 	<section class="book-hero">
-		<img src="/images/book-mopeds.png" alt="Couples enjoying a moped ride on a scenic road in Crete" class="book-hero__img" />
+		<img src="/images/book-mopeds.png" alt={t.book.altHero} class="book-hero__img" />
 	</section>
 
 	<main class="page page--image-top">
@@ -28,9 +28,9 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			<div class="book-cards__inner">
 				<article class="book-card">
 					<div class="book-card__img-wrap">
-						<img src="/images/sh-125.png" alt="SH 125cc" class="book-card__img" />
+						<img src="/images/sh-125.png" alt={t.book.cardSh125} class="book-card__img" />
 					</div>
-					<h3 class="book-card__title">SH 125cc</h3>
+					<h3 class="book-card__title">{t.book.cardSh125}</h3>
 					<ul class="book-card__features">
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
@@ -42,9 +42,9 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				</article>
 				<article class="book-card">
 					<div class="book-card__img-wrap">
-						<img src="/images/liberty-125.png" alt="LIBERTY 125cc" class="book-card__img" />
+						<img src="/images/liberty-125.png" alt={t.book.cardLiberty125} class="book-card__img" />
 					</div>
-					<h3 class="book-card__title">LIBERTY 125cc</h3>
+					<h3 class="book-card__title">{t.book.cardLiberty125}</h3>
 					<ul class="book-card__features">
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
@@ -56,9 +56,9 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				</article>
 				<article class="book-card">
 					<div class="book-card__img-wrap">
-						<img src="/images/sim-200.png" alt="SIM 200cc" class="book-card__img" />
+						<img src="/images/sim-200.png" alt={t.book.cardSim200} class="book-card__img" />
 					</div>
-					<h3 class="book-card__title">SIM 200cc</h3>
+					<h3 class="book-card__title">{t.book.cardSim200}</h3>
 					<ul class="book-card__features">
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>
@@ -70,9 +70,9 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				</article>
 				<article class="book-card">
 					<div class="book-card__img-wrap">
-						<img src="/images/voge-rally-300.png" alt="VOGE RALLY 300cc" class="book-card__img" />
+						<img src="/images/voge-rally-300.png" alt={t.book.cardVogeRally300} class="book-card__img" />
 					</div>
-					<h3 class="book-card__title">VOGE RALLY 300cc</h3>
+					<h3 class="book-card__title">{t.book.cardVogeRally300}</h3>
 					<ul class="book-card__features">
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature1}</li>
 						<li><span class="book-card__check" aria-hidden="true">✓</span> {t.book.feature2}</li>

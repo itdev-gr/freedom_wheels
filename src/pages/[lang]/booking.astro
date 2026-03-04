@@ -55,10 +55,10 @@ try {
 }
 if (locations.length === 0) {
 	locations = [
-		{ id: 'chania-store', slug: 'chania-store', label: 'Chania – Freedom Wheels (7 Apokoronou Str)', sort_order: 0 },
-		{ id: 'chania-port', slug: 'chania-port', label: 'Chania – Port', sort_order: 1 },
-		{ id: 'chania-airport', slug: 'chania-airport', label: 'Chania – Airport', sort_order: 2 },
-		{ id: 'other', slug: 'other', label: 'Other (specify in contact)', sort_order: 3 },
+		{ id: 'chania-store', slug: 'chania-store', label: t.booking.locChaniaStore, sort_order: 0 },
+		{ id: 'chania-port', slug: 'chania-port', label: t.booking.locChaniaPort, sort_order: 1 },
+		{ id: 'chania-airport', slug: 'chania-airport', label: t.booking.locChaniaAirport, sort_order: 2 },
+		{ id: 'other', slug: 'other', label: t.booking.locOther, sort_order: 3 },
 	];
 }
 
@@ -77,13 +77,13 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 						<h1 class="booking-scooter__title">{scooter.title}</h1>
 						<p class="booking-scooter__subtitle">{scooter.subtitle}</p>
 						<ul class="booking-scooter__features" aria-label="Features">
-							<li>Manual</li>
-							<li>Electric Start</li>
-							<li>ABS</li>
-							<li>Suspension System</li>
-							<li>Storage Space</li>
-							<li>Speedometer</li>
-							<li>Odometer</li>
+							<li>{t.booking.featureManual}</li>
+							<li>{t.booking.featureElectricStart}</li>
+							<li>{t.booking.featureAbs}</li>
+							<li>{t.booking.featureSuspension}</li>
+							<li>{t.booking.featureStorage}</li>
+							<li>{t.booking.featureSpeedometer}</li>
+							<li>{t.booking.featureOdometer}</li>
 						</ul>
 					</div>
 				</div>
@@ -170,7 +170,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 							<strong>{t.booking.totalPrice}</strong>
 							<strong id="summary-total">—</strong>
 						</div>
-						<div id="booking-data" data-days="1" data-model={modelParam} data-scooter-title={scooter.title} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} data-lang={lang} hidden></div>
+						<div id="booking-data" data-days="1" data-model={modelParam} data-scooter-title={scooter.title} data-prices={JSON.stringify(pricesMatrix)} data-locations={JSON.stringify(locations)} data-lang={lang} data-i18n-day={t.booking.dayUnit} data-i18n-days={t.booking.daysUnit} data-i18n-alert-fill={t.booking.alertFillAll} data-i18n-alert-dates={t.booking.alertValidDates} hidden></div>
 						<button type="button" id="continue-booking-btn" class="booking-cta">{t.booking.continueBooking}</button>
 					</div>
 				</div>
@@ -329,6 +329,10 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			const data = document.getElementById('booking-data');
 			const lang = data?.getAttribute('data-lang') || 'en';
 			const model = data?.getAttribute('data-model') || '';
+			var i18nDay = data?.getAttribute('data-i18n-day') || 'Day';
+			var i18nDays = data?.getAttribute('data-i18n-days') || 'Days';
+			var i18nAlertFill = data?.getAttribute('data-i18n-alert-fill') || 'Please fill in all dates and locations before continuing.';
+			var i18nAlertDates = data?.getAttribute('data-i18n-alert-dates') || 'Please select valid pickup and return dates.';
 			let pricesMatrix = [];
 			let locationsList = [];
 			try {
@@ -404,7 +408,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				var days = getDays();
 				var radio = document.querySelector('input[name="insurance"]:checked');
 				if (durationDaysEl) {
-					durationDaysEl.textContent = days != null ? (days === 1 ? '1 Day' : days + ' Days') : '—';
+					durationDaysEl.textContent = days != null ? (days === 1 ? '1 ' + i18nDay : days + ' ' + i18nDays) : '—';
 				}
 				if (summaryDaysEl) summaryDaysEl.textContent = days != null ? String(days) : '—';
 				if (!insuranceEl || !insuranceTotalEl || !totalEl) return;
@@ -471,12 +475,12 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 					var pickupLoc = document.getElementById('pickup-location');
 					var returnLoc = document.getElementById('return-location');
 					if (!pickupInput?.value || !returnInput?.value || !pickupLoc?.value || !returnLoc?.value) {
-						alert('Please fill in all dates and locations before continuing.');
+						alert(i18nAlertFill);
 						return;
 					}
 					var days = getDays();
 					if (days == null || days < 1) {
-						alert('Please select valid pickup and return dates.');
+						alert(i18nAlertDates);
 						return;
 					}
 					var totalText = totalEl?.textContent || '';

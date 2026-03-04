@@ -20,7 +20,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 
 <PublicLayout lang={lang} title={t.chania.title} description={t.chania.description} canonical={canonical} ogImage={ogImage} t={t}>
 	<section class="chania-hero">
-		<img src="/images/chania-scooter-sea.png" alt="Explore Chania by scooter with a view of the sea" class="chania-hero__img" />
+		<img src="/images/chania-scooter-sea.png" alt={t.chania.altHero} class="chania-hero__img" />
 	</section>
 
 	<main class="page page--image-top">
@@ -31,7 +31,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
 			</div>
 			<div class="discover-chania__media">
-				<img src="/images/elafonissos-3-1920.jpg" alt="Elafonissos beach with pink-white sand and turquoise waters" class="discover-chania__img" />
+				<img src="/images/elafonissos-3-1920.jpg" alt={t.chania.altElafonissos} class="discover-chania__img" />
 			</div>
 		</section>
 		<section class="discover-chania discover-chania--reverse">
@@ -41,7 +41,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
 			</div>
 			<div class="discover-chania__media">
-				<img src="/images/falasarna-main.jpg" alt="Falasarna beach with golden sand and crystal-clear waters" class="discover-chania__img" />
+				<img src="/images/falasarna-main.jpg" alt={t.chania.altFalasarna} class="discover-chania__img" />
 			</div>
 		</section>
 		<section class="discover-chania">
@@ -51,7 +51,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
 			</div>
 			<div class="discover-chania__media">
-				<img src="/images/mill.png" alt="Historic stone mill interior, Chania region" class="discover-chania__img" />
+				<img src="/images/mill.png" alt={t.chania.altMill} class="discover-chania__img" />
 			</div>
 		</section>
 		<section class="discover-chania discover-chania--reverse">
@@ -61,7 +61,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
 			</div>
 			<div class="discover-chania__media">
-				<img src="/images/therissos_view.png" alt="Panoramic view of mountains and sea from Therissos, Chania" class="discover-chania__img" />
+				<img src="/images/therissos_view.png" alt={t.chania.altTherissos} class="discover-chania__img" />
 			</div>
 		</section>
 		<section class="discover-chania">
@@ -71,7 +71,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
 			</div>
 			<div class="discover-chania__media">
-				<img src="/images/lake.png" alt="Clear lake with turquoise water, Chania region" class="discover-chania__img" />
+				<img src="/images/lake.png" alt={t.chania.altLake} class="discover-chania__img" />
 			</div>
 		</section>
 		<section class="discover-chania discover-chania--reverse">
@@ -81,7 +81,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<a href={`/${lang}/book`} class="discover-chania__btn">{t.chania.bookNow}</a>
 			</div>
 			<div class="discover-chania__media">
-				<img src="/images/chania-village-valley.png" alt="Village in a verdant valley with mountains, Chania region" class="discover-chania__img" />
+				<img src="/images/chania-village-valley.png" alt={t.chania.altVillage} class="discover-chania__img" />
 			</div>
 		</section>
 	</main>

@@ -22,7 +22,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 <PublicLayout lang={lang} title={t.checkout.title} description={t.checkout.description} canonical={canonical} ogImage={ogImage} t={t}>
 	<main class="page">
 		<section class="checkout-section">
-			<div id="checkout-lang" data-lang={lang} hidden></div>
+			<div id="checkout-lang" data-lang={lang} data-i18n-day={t.booking.dayUnit} data-i18n-days={t.booking.daysUnit} data-i18n-error-name={t.checkout.errorName} data-i18n-error-email={t.checkout.errorEmail} data-i18n-error-phone={t.checkout.errorPhone} data-i18n-licence-error={t.checkout.licenceError} data-i18n-redirecting={t.checkout.redirecting} data-i18n-online-payment={t.checkout.onlinePayment} data-i18n-error-payment={t.checkout.errorPaymentSession} data-i18n-error-network={t.checkout.errorNetwork} hidden></div>
 
 			<div id="success-banner" class="checkout-success" style="display:none;">
 				<div class="checkout-success__icon">&#10003;</div>
@@ -38,15 +38,15 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 					<h2 class="checkout-heading">{t.checkout.contactDetails}</h2>
 					<div class="checkout-field">
 						<label for="full-name">{t.checkout.fullName} <span class="required">*</span></label>
-						<input type="text" id="full-name" name="full-name" placeholder="John Doe" required />
+						<input type="text" id="full-name" name="full-name" placeholder={t.checkout.placeholderName} required />
 					</div>
 					<div class="checkout-field">
 						<label for="email">{t.checkout.email} <span class="required">*</span></label>
-						<input type="email" id="email" name="email" placeholder="john@example.com" required />
+						<input type="email" id="email" name="email" placeholder={t.checkout.placeholderEmail} required />
 					</div>
 					<div class="checkout-field">
 						<label for="phone">{t.checkout.phone} <span class="required">*</span></label>
-						<input type="tel" id="phone" name="phone" placeholder="+30 69..." required />
+						<input type="tel" id="phone" name="phone" placeholder={t.checkout.placeholderPhone} required />
 					</div>
 					<div class="checkout-field checkout-field--checkbox">
 						<label class="checkout-checkbox">
@@ -56,7 +56,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 					</div>
 					<div class="checkout-field">
 						<label for="notes">{t.checkout.notes} <span class="optional">{t.checkout.notesOptional}</span></label>
-						<textarea id="notes" name="notes" rows="3" placeholder="Any special requests or information..."></textarea>
+						<textarea id="notes" name="notes" rows="3" placeholder={t.checkout.placeholderNotes}></textarea>
 					</div>
 				</div>
 
@@ -273,6 +273,16 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 		(function () {
 			var langEl = document.getElementById('checkout-lang');
 			var lang = (langEl && langEl.getAttribute('data-lang')) || 'en';
+			var i18nDay = (langEl && langEl.getAttribute('data-i18n-day')) || 'Day';
+			var i18nDays = (langEl && langEl.getAttribute('data-i18n-days')) || 'Days';
+			var i18nErrorName = (langEl && langEl.getAttribute('data-i18n-error-name')) || 'Please enter your full name.';
+			var i18nErrorEmail = (langEl && langEl.getAttribute('data-i18n-error-email')) || 'Please enter your email address.';
+			var i18nErrorPhone = (langEl && langEl.getAttribute('data-i18n-error-phone')) || 'Please enter your phone number.';
+			var i18nLicenceError = (langEl && langEl.getAttribute('data-i18n-licence-error')) || 'You must confirm that you hold a valid A1 driving licence to proceed.';
+			var i18nRedirecting = (langEl && langEl.getAttribute('data-i18n-redirecting')) || 'Redirecting...';
+			var i18nOnlinePayment = (langEl && langEl.getAttribute('data-i18n-online-payment')) || 'Online Payment';
+			var i18nErrorPayment = (langEl && langEl.getAttribute('data-i18n-error-payment')) || 'Failed to create payment session.';
+			var i18nErrorNetwork = (langEl && langEl.getAttribute('data-i18n-error-network')) || 'Network error. Please try again.';
 
 			var stored = localStorage.getItem('fw_checkout');
 			var booking = stored ? JSON.parse(stored) : null;
@@ -344,7 +354,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			if (sumPickupLoc) sumPickupLoc.textContent = booking.pickupLocationLabel || booking.pickupLocation;
 			if (sumReturnDate) sumReturnDate.textContent = booking.returnDate;
 			if (sumReturnLoc) sumReturnLoc.textContent = booking.returnLocationLabel || booking.returnLocation;
-			if (sumDays) sumDays.textContent = booking.totalDays + (booking.totalDays === 1 ? ' Day' : ' Days');
+			if (sumDays) sumDays.textContent = booking.totalDays + (booking.totalDays === 1 ? ' ' + i18nDay : ' ' + i18nDays);
 			if (sumTotal) sumTotal.textContent = '\u20AC' + Number(booking.totalEur).toFixed(2);
 
 			function getFormData() {
@@ -358,14 +368,12 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 
 			function validate() {
 				var form = getFormData();
-				if (!form.name) { showError('Please enter your full name.'); return null; }
-				if (!form.email) { showError('Please enter your email address.'); return null; }
-				if (!form.phone) { showError('Please enter your phone number.'); return null; }
+				if (!form.name) { showError(i18nErrorName); return null; }
+				if (!form.email) { showError(i18nErrorEmail); return null; }
+				if (!form.phone) { showError(i18nErrorPhone); return null; }
 				var licenceBox = document.getElementById('licence-confirm');
 				if (licenceBox && !licenceBox.checked) {
-					showError(lang === 'el'
-						? 'Πρέπει να επιβεβαιώσετε ότι κατέχετε έγκυρο δίπλωμα οδήγησης A1 για να συνεχίσετε.'
-						: 'You must confirm that you hold a valid A1 driving licence to proceed.');
+					showError(i18nLicenceError);
 					return null;
 				}
 				hideError();
@@ -378,7 +386,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 					var form = validate();
 					if (!form) return;
 					onlineBtn.disabled = true;
-					onlineBtn.textContent = 'Redirecting...';
+					onlineBtn.textContent = i18nRedirecting;
 
 					booking.customerName = form.name;
 					booking.customerEmail = form.email;
@@ -410,15 +418,15 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 							if (data.url) {
 								window.location.href = data.url;
 							} else {
-								showError(data.error || 'Failed to create payment session.');
+								showError(data.error || i18nErrorPayment);
 								onlineBtn.disabled = false;
-								onlineBtn.textContent = 'Online Payment';
+								onlineBtn.textContent = i18nOnlinePayment;
 							}
 						})
 						.catch(function () {
-							showError('Network error. Please try again.');
+							showError(i18nErrorNetwork);
 							onlineBtn.disabled = false;
-							onlineBtn.textContent = 'Online Payment';
+							onlineBtn.textContent = i18nOnlinePayment;
 						});
 				});
 			}

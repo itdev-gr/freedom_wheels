@@ -55,7 +55,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 
 <PublicLayout lang={lang} title={t.rentals.title} description={t.rentals.description} canonical={canonical} ogImage={ogImage} t={t}>
 	<div class="rentals-flyer__hero">
-		<img src="/images/rentals-hero.png" alt="Couple enjoying a scooter ride in Chania" />
+		<img src="/images/rentals-hero.png" alt={t.rentals.altHero} />
 	</div>
 
 	<main class="page page--hero-top">
@@ -64,27 +64,27 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				<aside class="rentals-flyer__sidebar">
 					<div class="rentals-flyer__sidebar-card">
 						<div class="rentals-flyer__sidebar-img">
-							<img src="/images/sh-125.png" alt="SH 125cc 2024" />
+							<img src="/images/sh-125.png" alt={t.rentals.sidebarSh125} />
 						</div>
-						<span class="rentals-flyer__sidebar-label">SH 125cc 2024</span>
+						<span class="rentals-flyer__sidebar-label">{t.rentals.sidebarSh125}</span>
 					</div>
 					<div class="rentals-flyer__sidebar-card">
 						<div class="rentals-flyer__sidebar-img">
-							<img src="/images/sim-200.png" alt="SIM 200cc 2025" />
+							<img src="/images/sim-200.png" alt={t.rentals.sidebarSim200} />
 						</div>
-						<span class="rentals-flyer__sidebar-label">SIM 200cc 2025</span>
+						<span class="rentals-flyer__sidebar-label">{t.rentals.sidebarSim200}</span>
 					</div>
 					<div class="rentals-flyer__sidebar-card">
 						<div class="rentals-flyer__sidebar-img">
-							<img src="/images/liberty-125.png" alt="LIBERTY 125cc 2025" />
+							<img src="/images/liberty-125.png" alt={t.rentals.sidebarLiberty125} />
 						</div>
-						<span class="rentals-flyer__sidebar-label">LIBERTY 125cc 2025</span>
+						<span class="rentals-flyer__sidebar-label">{t.rentals.sidebarLiberty125}</span>
 					</div>
 					<div class="rentals-flyer__sidebar-card">
 						<div class="rentals-flyer__sidebar-img">
-							<img src="/images/voge-rally-300.png" alt="VOGE RALLY 300cc 2024" />
+							<img src="/images/voge-rally-300.png" alt={t.rentals.sidebarVogeRally300} />
 						</div>
-						<span class="rentals-flyer__sidebar-label">VOGE RALLY 300cc 2024</span>
+						<span class="rentals-flyer__sidebar-label">{t.rentals.sidebarVogeRally300}</span>
 					</div>
 				</aside>
 
