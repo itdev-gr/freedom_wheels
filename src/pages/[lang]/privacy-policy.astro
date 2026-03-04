@@ -1,0 +1,179 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import en from '../../locales/en';
+import el from '../../locales/el';
+
+export function getStaticPaths() {
+	return [{ params: { lang: 'en' } }, { params: { lang: 'el' } }];
+}
+
+const { lang } = Astro.params;
+if (lang !== 'en' && lang !== 'el') {
+	return Astro.redirect('/en');
+}
+
+const t = lang === 'el' ? el : en;
+const site = Astro.site ?? new URL(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/logos/logo.webp', site).href;
+---
+
+<PublicLayout lang={lang} title={t.privacyPolicy.title} description={t.privacyPolicy.description} canonical={canonical} ogImage={ogImage} t={t}>
+	<main class="page">
+		<section class="legal-section">
+			<h1 class="legal-page-title">{t.privacyPolicy.pageTitle}</h1>
+			<p class="legal-updated">{t.privacyPolicy.lastUpdated}</p>
+
+			<div class="legal-content">
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.introTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.introText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.controllerTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.controllerText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.dataCollectedTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.dataCollectedText}</p>
+					<ul class="legal-item__list">
+						<li>{t.privacyPolicy.dataBooking}</li>
+						<li>{t.privacyPolicy.dataPayment}</li>
+						<li>{t.privacyPolicy.dataContact}</li>
+						<li>{t.privacyPolicy.dataDevice}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.purposeTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.purposeText}</p>
+					<ul class="legal-item__list">
+						<li>{t.privacyPolicy.purposeBooking}</li>
+						<li>{t.privacyPolicy.purposePayment}</li>
+						<li>{t.privacyPolicy.purposeCommunication}</li>
+						<li>{t.privacyPolicy.purposeLegal}</li>
+						<li>{t.privacyPolicy.purposeImprove}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.legalBasisTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.legalBasisText}</p>
+					<ul class="legal-item__list">
+						<li>{t.privacyPolicy.legalBasisContract}</li>
+						<li>{t.privacyPolicy.legalBasisConsent}</li>
+						<li>{t.privacyPolicy.legalBasisLegal}</li>
+						<li>{t.privacyPolicy.legalBasisLegitimate}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.sharingTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.sharingText}</p>
+					<ul class="legal-item__list">
+						<li>{t.privacyPolicy.sharingStripe}</li>
+						<li>{t.privacyPolicy.sharingGoogle}</li>
+						<li>{t.privacyPolicy.sharingHosting}</li>
+						<li>{t.privacyPolicy.sharingAuthorities}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.retentionTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.retentionText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.rightsTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.rightsText}</p>
+					<ul class="legal-item__list">
+						<li>{t.privacyPolicy.rightsAccess}</li>
+						<li>{t.privacyPolicy.rightsRectification}</li>
+						<li>{t.privacyPolicy.rightsErasure}</li>
+						<li>{t.privacyPolicy.rightsRestriction}</li>
+						<li>{t.privacyPolicy.rightsPortability}</li>
+						<li>{t.privacyPolicy.rightsObjection}</li>
+						<li>{t.privacyPolicy.rightsWithdraw}</li>
+					</ul>
+					<p class="legal-item__text">{t.privacyPolicy.rightsExercise}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.securityTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.securityText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.childrenTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.childrenText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.changesTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.changesText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.privacyPolicy.contactTitle}</h2>
+					<p class="legal-item__text">{t.privacyPolicy.contactText}</p>
+					<p class="legal-item__text">Email: info@freedomwheels.gr</p>
+					<p class="legal-item__text">Phone: +30 2821 405 794</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<style is:global>
+		.page { padding-top: 70px; }
+		.legal-section {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2.5rem 1.5rem 4rem;
+		}
+		.legal-page-title {
+			color: #1d8299;
+			font-size: 1.8rem;
+			font-weight: 700;
+			text-align: center;
+			margin: 0 0 0.5rem;
+		}
+		.legal-updated {
+			text-align: center;
+			font-size: 0.9rem;
+			color: #888;
+			margin: 0 0 2rem;
+		}
+		.legal-content {
+			display: flex;
+			flex-direction: column;
+			gap: 1.5rem;
+		}
+		.legal-item {
+			padding-bottom: 1.5rem;
+			border-bottom: 1px solid #e5e7eb;
+		}
+		.legal-item:last-child {
+			border-bottom: none;
+			padding-bottom: 0;
+		}
+		.legal-item__title {
+			font-size: 1.1rem;
+			font-weight: 700;
+			color: #1a1a1a;
+			margin: 0 0 0.5rem;
+		}
+		.legal-item__text {
+			font-size: 0.95rem;
+			line-height: 1.65;
+			color: #444;
+			margin: 0 0 0.5rem;
+		}
+		.legal-item__text:last-child { margin-bottom: 0; }
+		.legal-item__list {
+			margin: 0.5rem 0 0;
+			padding: 0 0 0 1.25rem;
+			list-style: disc;
+		}
+		.legal-item__list li {
+			font-size: 0.95rem;
+			line-height: 1.6;
+			color: #444;
+			margin-bottom: 0.35rem;
+		}
+		.legal-item__list li:last-child { margin-bottom: 0; }
+		@media (max-width: 600px) {
+			.legal-section { padding: 1.5rem 1rem 3rem; }
+		}
+	</style>
+</PublicLayout>

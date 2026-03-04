@@ -138,10 +138,9 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 					<h3 class="site-footer__heading">{t.footer.about}</h3>
 					<ul>
 						<li><a href={lang === 'en' ? '/en/rental-terms' : '/el/rental-terms'}>{t.footer.rentalTerms}</a></li>
-						<li><a href={lang === 'en' ? '/en#policy' : '/el#policy'}>{t.footer.bookingPolicy}</a></li>
-						<li><a href={lang === 'en' ? '/en#cookies' : '/el#cookies'}>{t.footer.cookiePolicy}</a></li>
-						<li><a href={lang === 'en' ? '/en#terms-use' : '/el#terms-use'}>{t.footer.termsOfUse}</a></li>
-						<li><a href={lang === 'en' ? '/en#privacy' : '/el#privacy'}>{t.footer.privacyPolicy}</a></li>
+						<li><a href={lang === 'en' ? '/en/cookie-policy' : '/el/cookie-policy'}>{t.footer.cookiePolicy}</a></li>
+						<li><a href={lang === 'en' ? '/en/terms-of-use' : '/el/terms-of-use'}>{t.footer.termsOfUse}</a></li>
+						<li><a href={lang === 'en' ? '/en/privacy-policy' : '/el/privacy-policy'}>{t.footer.privacyPolicy}</a></li>
 						<li><a href={lang === 'en' ? '/en/contact' : '/el/contact'}>{t.footer.contact}</a></li>
 					</ul>
 				</div>

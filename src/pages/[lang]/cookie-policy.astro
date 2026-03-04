@@ -1,0 +1,143 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import en from '../../locales/en';
+import el from '../../locales/el';
+
+export function getStaticPaths() {
+	return [{ params: { lang: 'en' } }, { params: { lang: 'el' } }];
+}
+
+const { lang } = Astro.params;
+if (lang !== 'en' && lang !== 'el') {
+	return Astro.redirect('/en');
+}
+
+const t = lang === 'el' ? el : en;
+const site = Astro.site ?? new URL(Astro.url.pathname);
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/logos/logo.webp', site).href;
+---
+
+<PublicLayout lang={lang} title={t.cookiePolicy.title} description={t.cookiePolicy.description} canonical={canonical} ogImage={ogImage} t={t}>
+	<main class="page">
+		<section class="legal-section">
+			<h1 class="legal-page-title">{t.cookiePolicy.pageTitle}</h1>
+			<p class="legal-updated">{t.cookiePolicy.lastUpdated}</p>
+
+			<div class="legal-content">
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.introTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.introText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.whatTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.whatText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.essentialTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.essentialText}</p>
+					<ul class="legal-item__list">
+						<li>{t.cookiePolicy.essentialLang}</li>
+						<li>{t.cookiePolicy.essentialSession}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.analyticsTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.analyticsText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.thirdPartyTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.thirdPartyText}</p>
+					<ul class="legal-item__list">
+						<li>{t.cookiePolicy.thirdPartyStripe}</li>
+						<li>{t.cookiePolicy.thirdPartyMaps}</li>
+						<li>{t.cookiePolicy.thirdPartyWhatsApp}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.managingTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.managingText}</p>
+					<ul class="legal-item__list">
+						<li>{t.cookiePolicy.managingChrome}</li>
+						<li>{t.cookiePolicy.managingFirefox}</li>
+						<li>{t.cookiePolicy.managingSafari}</li>
+						<li>{t.cookiePolicy.managingEdge}</li>
+					</ul>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.changesTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.changesText}</p>
+				</div>
+				<div class="legal-item">
+					<h2 class="legal-item__title">{t.cookiePolicy.contactTitle}</h2>
+					<p class="legal-item__text">{t.cookiePolicy.contactText}</p>
+					<p class="legal-item__text">Email: info@freedomwheels.gr</p>
+					<p class="legal-item__text">Phone: +30 2821 405 794</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<style is:global>
+		.page { padding-top: 70px; }
+		.legal-section {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2.5rem 1.5rem 4rem;
+		}
+		.legal-page-title {
+			color: #1d8299;
+			font-size: 1.8rem;
+			font-weight: 700;
+			text-align: center;
+			margin: 0 0 0.5rem;
+		}
+		.legal-updated {
+			text-align: center;
+			font-size: 0.9rem;
+			color: #888;
+			margin: 0 0 2rem;
+		}
+		.legal-content {
+			display: flex;
+			flex-direction: column;
+			gap: 1.5rem;
+		}
+		.legal-item {
+			padding-bottom: 1.5rem;
+			border-bottom: 1px solid #e5e7eb;
+		}
+		.legal-item:last-child {
+			border-bottom: none;
+			padding-bottom: 0;
+		}
+		.legal-item__title {
+			font-size: 1.1rem;
+			font-weight: 700;
+			color: #1a1a1a;
+			margin: 0 0 0.5rem;
+		}
+		.legal-item__text {
+			font-size: 0.95rem;
+			line-height: 1.65;
+			color: #444;
+			margin: 0 0 0.5rem;
+		}
+		.legal-item__text:last-child { margin-bottom: 0; }
+		.legal-item__list {
+			margin: 0.5rem 0 0;
+			padding: 0 0 0 1.25rem;
+			list-style: disc;
+		}
+		.legal-item__list li {
+			font-size: 0.95rem;
+			line-height: 1.6;
+			color: #444;
+			margin-bottom: 0.35rem;
+		}
+		.legal-item__list li:last-child { margin-bottom: 0; }
+		@media (max-width: 600px) {
+			.legal-section { padding: 1.5rem 1rem 3rem; }
+		}
+	</style>
+</PublicLayout>
