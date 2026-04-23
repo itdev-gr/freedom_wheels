@@ -87,22 +87,41 @@ if (!session) return Astro.redirect('/login');
 	</style>
 	<div class="dash-card">
 		<h2 style="margin-top: 0; font-size: 1.1rem;">All bookings</h2>
-		<table class="dash-table" id="bookings-table">
-			<thead>
-				<tr>
-					<th>Customer</th>
-					<th>Scooter</th>
-					<th>Pickup</th>
-					<th>Return</th>
-					<th>Total</th>
-					<th>Status</th>
-				</tr>
-			</thead>
-			<tbody id="bookings-tbody">
-				<tr><td colspan="6">Loading…</td></tr>
-			</tbody>
-		</table>
+		<div class="bookings-table-wrap">
+			<table class="dash-table bookings-table" id="bookings-table">
+				<thead>
+					<tr>
+						<th>Customer</th>
+						<th>Email</th>
+						<th>Phone</th>
+						<th>Scooter</th>
+						<th>Pickup</th>
+						<th>Return</th>
+						<th>Pickup loc.</th>
+						<th>Return loc.</th>
+						<th>Payment</th>
+						<th>Total</th>
+						<th>Status</th>
+						<th>Created</th>
+						<th>Notes</th>
+					</tr>
+				</thead>
+				<tbody id="bookings-tbody">
+					<tr><td colspan="13">Loading…</td></tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
+	<style>
+		.bookings-table-wrap { overflow-x: auto; }
+		.bookings-table { min-width: 1200px; font-size: 0.85rem; }
+		.bookings-table td.notes-cell {
+			max-width: 260px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	</style>
 	<script>
 		function escapeHtml(s) {
 			const div = document.createElement('div');
@@ -169,13 +188,29 @@ if (!session) return Astro.redirect('/login');
 			// Load locations
 			const locRes = await fetch('/api/locations', { credentials: 'include' });
 			const locations = locRes.ok ? await locRes.json() : [];
+			const locationLabels = {};
 			locations.forEach((loc) => {
+				locationLabels[loc.id] = loc.label || loc.id;
 				const opt = document.createElement('option');
 				opt.value = loc.id;
 				opt.textContent = loc.label || loc.id;
 				pickupSelect?.appendChild(opt.cloneNode(true));
 				returnSelect?.appendChild(opt);
 			});
+
+			// Load scooters for label lookup
+			const scRes = await fetch('/api/scooters', { credentials: 'include' });
+			const scooters = scRes.ok ? await scRes.json() : [];
+			const scooterLabels = {};
+			scooters.forEach((s) => { scooterLabels[s.id] = s.label || s.id; });
+
+			function fmtCreated(iso) {
+				if (!iso) return '';
+				const d = new Date(iso);
+				if (isNaN(d.getTime())) return String(iso);
+				const pad = (n) => String(n).padStart(2, '0');
+				return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+			}
 
 			// Load prices matrix
 			const pricesRes = await fetch('/api/prices', { credentials: 'include' });
@@ -209,21 +244,33 @@ if (!session) return Astro.redirect('/login');
 			// Load bookings table
 			const bookRes = await fetch('/api/bookings', { credentials: 'include' });
 			if (!bookRes.ok) {
-				tbody.innerHTML = '<tr><td colspan="6">Failed to load bookings.</td></tr>';
+				tbody.innerHTML = '<tr><td colspan="13">Failed to load bookings.</td></tr>';
 			} else {
 				const bookings = await bookRes.json();
 				tbody.innerHTML = bookings.length === 0
-					? '<tr><td colspan="6">No bookings yet.</td></tr>'
-					: bookings.map((b) => `
+					? '<tr><td colspan="13">No bookings yet.</td></tr>'
+					: bookings.map((b) => {
+						const scooterLbl = scooterLabels[b.scooterId] || b.scooterId || '';
+						const pickupLoc = locationLabels[b.pickupLocationId] || b.pickupLocationId || '';
+						const returnLoc = locationLabels[b.returnLocationId] || b.returnLocationId || '';
+						const notes = b.notes ?? '';
+						return `
 						<tr>
 							<td>${escapeHtml(b.customerName ?? '')}</td>
-							<td>${escapeHtml(b.scooterId ?? '')}</td>
+							<td>${escapeHtml(b.email ?? '')}</td>
+							<td>${escapeHtml(b.phone ?? '')}</td>
+							<td>${escapeHtml(scooterLbl)}</td>
 							<td>${escapeHtml(b.pickupDate ?? '')}</td>
 							<td>${escapeHtml(b.returnDate ?? '')}</td>
+							<td>${escapeHtml(pickupLoc)}</td>
+							<td>${escapeHtml(returnLoc)}</td>
+							<td>${escapeHtml(b.paymentMethod ?? '')}</td>
 							<td>€${Number(b.totalEur ?? 0).toFixed(2)}</td>
 							<td>${escapeHtml(b.status ?? '')}</td>
-						</tr>
-					`).join('');
+							<td>${escapeHtml(fmtCreated(b.createdAt))}</td>
+							<td class="notes-cell" title="${escapeHtml(notes)}">${escapeHtml(notes)}</td>
+						</tr>`;
+					}).join('');
 			}
 
 			form.addEventListener('submit', async (e) => {

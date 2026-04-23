@@ -33,6 +33,7 @@ export const GET: APIRoute = async ({ request }) => {
 				returnLocationId: data.returnLocationId,
 				totalEur: data.totalEur,
 				status: data.status,
+				paymentMethod: data.paymentMethod,
 				notes: data.notes,
 				createdAt: data.createdAt,
 			};
