@@ -307,6 +307,23 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				if (successBanner) successBanner.style.display = 'block';
 
 				if (booking) {
+					var txId = sessionId || ('fw_' + Date.now());
+					var purchaseKey = 'fw_purchase_' + txId;
+					if (!sessionStorage.getItem(purchaseKey) && typeof gtag === 'function') {
+						gtag('event', 'purchase', {
+							transaction_id: txId,
+							value: Number(booking.totalEur) || 0,
+							currency: 'EUR',
+							items: [{
+								item_id: booking.model,
+								item_name: booking.scooterTitle || booking.model,
+								price: Number(booking.totalEur) || 0,
+								quantity: 1,
+							}],
+						});
+						sessionStorage.setItem(purchaseKey, '1');
+					}
+
 					var nameVal = booking.customerName || '';
 					var emailVal = booking.customerEmail || '';
 					var phoneVal = booking.customerPhone || '';

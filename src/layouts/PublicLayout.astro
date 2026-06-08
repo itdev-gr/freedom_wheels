@@ -28,6 +28,13 @@ const imageUrl = ogImage ?? new URL('/logos/logo.webp', site).href;
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-VPG88PCSF0"></script>
+		<script is:inline>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-VPG88PCSF0');
+		</script>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonicalUrl} />
 		<meta property="og:type" content="website" />
