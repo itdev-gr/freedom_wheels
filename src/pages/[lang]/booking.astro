@@ -425,8 +425,9 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				var returnLocId = document.getElementById('return-location')?.value || '';
 				var locPrice = 0;
 				locationsList.forEach(function (loc) {
-					if (loc.id === pickupLocId && loc.price_eur != null) locPrice += Number(loc.price_eur);
-					if (loc.id === returnLocId && loc.price_eur != null && returnLocId !== pickupLocId) locPrice += Number(loc.price_eur);
+					if (loc.price_eur == null) return;
+					if (loc.id === pickupLocId || loc.slug === pickupLocId) locPrice += Number(loc.price_eur);
+					if (loc.id === returnLocId || loc.slug === returnLocId) locPrice += Number(loc.price_eur);
 				});
 				var season = pickupInput?.value ? getSeason(pickupInput.value) : 'high';
 				var baseTotal = NaN;

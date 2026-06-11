@@ -46,6 +46,32 @@ export const GET: APIRoute = async ({ request }) => {
 	}
 };
 
+const ALLOWED_STATUSES = ['pending', 'completed', 'cancelled', 'canceled'];
+
+// Cancelling a booking is what frees its dates and scooter again: the
+// availability checks (here and in public-booking.ts) skip cancelled bookings.
+export const PATCH: APIRoute = async ({ request }) => {
+	const session = await verifySession(request);
+	if (!session) return json({ error: 'Unauthorized' }, 401);
+	const db = getDb();
+	if (!db) return json({ error: 'Database not configured' }, 503);
+	try {
+		const body = (await request.json()) as { id?: string; status?: string };
+		const id = String(body.id ?? '').trim();
+		if (!id) return json({ error: 'id required' }, 400);
+		const status = String(body.status ?? '').trim();
+		if (!ALLOWED_STATUSES.includes(status.toLowerCase())) return json({ error: 'Invalid status' }, 400);
+		const ref = db.collection('bookings').doc(id);
+		const snap = await ref.get();
+		if (!snap.exists) return json({ error: 'Booking not found' }, 404);
+		await ref.set({ status }, { merge: true });
+		return json({ ok: true });
+	} catch (e) {
+		console.error(e);
+		return json({ error: 'Failed to update booking' }, 500);
+	}
+};
+
 export const POST: APIRoute = async ({ request }) => {
 	const session = await verifySession(request);
 	if (!session) return json({ error: 'Unauthorized' }, 401);

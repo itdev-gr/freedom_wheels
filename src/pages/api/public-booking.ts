@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
+import { computeBookingTotal, fetchPricingData } from '../../lib/pricing';
 
 export const prerender = false;
 
@@ -40,6 +41,25 @@ export const POST: APIRoute = async ({ request }) => {
 		const pickupDate = String(body.pickupDate ?? '').trim();
 		const returnDate = String(body.returnDate ?? '').trim();
 
+		// Recompute the total server-side; keep the client value only as a fallback
+		// so a booking that was already paid is never dropped.
+		let totalEur = Number(body.totalEur) || 0;
+		try {
+			const { prices, locations } = await fetchPricingData(db);
+			const computed = computeBookingTotal({
+				scooterId,
+				pickupDate,
+				returnDate,
+				pickupLocationId: String(body.pickupLocationId ?? '').trim(),
+				returnLocationId: String(body.returnLocationId ?? '').trim(),
+				prices,
+				locations,
+			});
+			if (computed) totalEur = computed.totalEur;
+		} catch (e) {
+			console.error('Failed to recompute booking total, storing client value:', e);
+		}
+
 		const doc = {
 			customerName,
 			email,
@@ -49,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
 			returnDate,
 			pickupLocationId: String(body.pickupLocationId ?? '').trim(),
 			returnLocationId: String(body.returnLocationId ?? '').trim(),
-			totalEur: Number(body.totalEur) || 0,
+			totalEur,
 			status: String(body.status ?? 'Pending').trim(),
 			notes: String(body.notes ?? '').trim(),
 			paymentMethod: String(body.paymentMethod ?? 'delivery').trim(),

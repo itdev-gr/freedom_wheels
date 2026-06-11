@@ -104,10 +104,11 @@ if (!session) return Astro.redirect('/login');
 						<th>Status</th>
 						<th>Created</th>
 						<th>Notes</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody id="bookings-tbody">
-					<tr><td colspan="13">Loading…</td></tr>
+					<tr><td colspan="14">Loading…</td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -244,16 +245,20 @@ if (!session) return Astro.redirect('/login');
 			// Load bookings table
 			const bookRes = await fetch('/api/bookings', { credentials: 'include' });
 			if (!bookRes.ok) {
-				tbody.innerHTML = '<tr><td colspan="13">Failed to load bookings.</td></tr>';
+				tbody.innerHTML = '<tr><td colspan="14">Failed to load bookings.</td></tr>';
 			} else {
 				const bookings = await bookRes.json();
 				tbody.innerHTML = bookings.length === 0
-					? '<tr><td colspan="13">No bookings yet.</td></tr>'
+					? '<tr><td colspan="14">No bookings yet.</td></tr>'
 					: bookings.map((b) => {
 						const scooterLbl = scooterLabels[b.scooterId] || b.scooterId || '';
 						const pickupLoc = locationLabels[b.pickupLocationId] || b.pickupLocationId || '';
 						const returnLoc = locationLabels[b.returnLocationId] || b.returnLocationId || '';
 						const notes = b.notes ?? '';
+						const isCancelled = String(b.status ?? '').toLowerCase().startsWith('cancel');
+						const actions = isCancelled
+							? ''
+							: `<button type="button" class="dash-btn dash-btn--danger cancel-booking-btn" data-id="${escapeHtml(b.id)}" data-customer="${escapeHtml(b.customerName ?? '')}">Cancel</button>`;
 						return `
 						<tr>
 							<td>${escapeHtml(b.customerName ?? '')}</td>
@@ -269,9 +274,33 @@ if (!session) return Astro.redirect('/login');
 							<td>${escapeHtml(b.status ?? '')}</td>
 							<td>${escapeHtml(fmtCreated(b.createdAt))}</td>
 							<td class="notes-cell" title="${escapeHtml(notes)}">${escapeHtml(notes)}</td>
+							<td>${actions}</td>
 						</tr>`;
 					}).join('');
 			}
+
+			tbody.addEventListener('click', async (e) => {
+				const btn = (e.target as HTMLElement).closest('.cancel-booking-btn') as HTMLButtonElement | null;
+				if (!btn) return;
+				const id = btn.getAttribute('data-id');
+				if (!id) return;
+				const customer = btn.getAttribute('data-customer') || 'this customer';
+				if (!confirm(`Cancel the booking for ${customer}? The dates and scooter will become available again.`)) return;
+				btn.disabled = true;
+				const res = await fetch('/api/bookings', {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify({ id, status: 'Cancelled' }),
+				});
+				const data = await res.json().catch(() => ({}));
+				if (res.ok) {
+					window.location.reload();
+				} else {
+					alert(data.error || 'Failed to cancel booking.');
+					btn.disabled = false;
+				}
+			});
 
 			form.addEventListener('submit', async (e) => {
 				e.preventDefault();

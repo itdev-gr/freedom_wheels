@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
+import { getDb } from '../../lib/firebase';
+import { computeBookingTotal, fetchPricingData } from '../../lib/pricing';
 
 export const prerender = false;
 
@@ -34,11 +36,30 @@ export const POST: APIRoute = async ({ request, url }) => {
 			lang?: string;
 		};
 
-		const totalEur = Number(body.totalEur) || 0;
-		if (totalEur <= 0) return json({ error: 'Invalid total amount' }, 400);
+		// Recompute the total server-side from Firestore prices and location fees —
+		// the client-sent totalEur is display-only and must not decide the charge.
+		const db = getDb();
+		if (!db) return json({ error: 'Database not configured' }, 503);
+		const { prices, locations } = await fetchPricingData(db);
+		const computed = computeBookingTotal({
+			scooterId: String(body.scooterId ?? '').trim(),
+			pickupDate: String(body.pickupDate ?? '').trim(),
+			returnDate: String(body.returnDate ?? '').trim(),
+			pickupLocationId: String(body.pickupLocationId ?? '').trim(),
+			returnLocationId: String(body.returnLocationId ?? '').trim(),
+			prices,
+			locations,
+		});
+		if (!computed || computed.totalEur <= 0) return json({ error: 'Invalid total amount' }, 400);
+
+		const totalEur = computed.totalEur;
+		const totalDays = computed.totalDays;
+		const clientTotal = Number(body.totalEur) || 0;
+		if (Math.abs(totalEur - clientTotal) > 0.01) {
+			console.warn(`Checkout total mismatch: client sent €${clientTotal}, server computed €${totalEur}`);
+		}
 
 		const scooterTitle = String(body.scooterTitle ?? 'Scooter Rental').trim();
-		const totalDays = Number(body.totalDays) || 1;
 
 		const origin = url.origin;
 		const lang = body.lang === 'el' ? 'el' : 'en';
