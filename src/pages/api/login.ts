@@ -26,12 +26,18 @@ export const POST: APIRoute = async ({ request }) => {
 
 	const auth = getAdminAuth();
 	if (!auth) return json({ error: 'Auth not configured' }, 503);
+
+	// Exchange the (short-lived, 1-hour) ID token for a long-lived Firebase
+	// session cookie so the admin stays signed in for the full cookie lifetime
+	// instead of being logged out after an hour.
+	const expiresInMs = 60 * 60 * 24 * 5 * 1000; // 5 days
+	let sessionCookie: string;
 	try {
-		await auth.verifyIdToken(idToken);
+		sessionCookie = await auth.createSessionCookie(idToken, { expiresIn: expiresInMs });
 	} catch {
 		return json({ error: 'Invalid token' }, 401);
 	}
 
-	const cookieHeader = setSessionCookieHeader(idToken);
+	const cookieHeader = setSessionCookieHeader(sessionCookie);
 	return json({ ok: true }, 200, { 'Set-Cookie': cookieHeader });
 };

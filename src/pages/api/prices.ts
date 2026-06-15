@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
 import { verifySession } from '../../lib/auth';
+import { getPrices, invalidate } from '../../lib/store';
 
 export const prerender = false;
 
@@ -23,16 +24,7 @@ export const GET: APIRoute = async ({ request }) => {
 	const season = url.searchParams.get('season');
 	const daysParam = url.searchParams.get('days');
 	try {
-		const snap = await db.collection('prices').get();
-		let prices = snap.docs.map((d) => {
-			const data = d.data();
-			return {
-				scooter_id: data.scooterId,
-				season: data.season,
-				days: data.days,
-				price_eur: data.priceEur,
-			};
-		});
+		let prices = await getPrices(db);
 		if (scooter) prices = prices.filter((p) => p.scooter_id === scooter);
 		if (season) prices = prices.filter((p) => p.season === season);
 		if (daysParam) prices = prices.filter((p) => p.days === parseInt(daysParam, 10));
@@ -60,6 +52,7 @@ export const PUT: APIRoute = async ({ request }) => {
 			const id = docId(scooterId, season, days);
 			await db.collection('prices').doc(id).set({ scooterId, season, days, priceEur }, { merge: true });
 		}
+		invalidate('prices');
 		return json({ ok: true });
 	} catch (e) {
 		console.error(e);

@@ -1,30 +1,13 @@
 import type { Firestore } from 'firebase-admin/firestore';
+import { getPrices, getLocations } from './store.ts';
 
 export type PriceRow = { scooter_id: string; season: string; days: number; price_eur: number };
 export type LocationRow = { id: string; slug?: string; price_eur?: number | null };
 
+// Reads go through the cached catalog store so the checkout and booking paths
+// do not hit Firestore on every request (see src/lib/store.ts).
 export async function fetchPricingData(db: Firestore): Promise<{ prices: PriceRow[]; locations: LocationRow[] }> {
-	const [priceSnap, locSnap] = await Promise.all([
-		db.collection('prices').get(),
-		db.collection('locations').get(),
-	]);
-	const prices = priceSnap.docs.map((d) => {
-		const data = d.data();
-		return {
-			scooter_id: data.scooterId,
-			season: data.season,
-			days: data.days,
-			price_eur: data.priceEur,
-		};
-	});
-	const locations = locSnap.docs.map((d) => {
-		const data = d.data();
-		return {
-			id: d.id,
-			slug: data.slug,
-			price_eur: data.priceEur != null ? data.priceEur : null,
-		};
-	});
+	const [prices, locations] = await Promise.all([getPrices(db), getLocations(db)]);
 	return { prices, locations };
 }
 

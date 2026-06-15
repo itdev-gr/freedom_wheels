@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
 import { verifySession } from '../../lib/auth';
+import { getLocations, invalidate } from '../../lib/store';
 
 export const prerender = false;
 
@@ -15,17 +16,7 @@ export const GET: APIRoute = async () => {
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
-		const snap = await db.collection('locations').orderBy('sortOrder').get();
-		const locations = snap.docs.map((d) => {
-			const data = d.data();
-			return {
-				id: d.id,
-				slug: data.slug,
-				label: data.label,
-				sort_order: data.sortOrder,
-				price_eur: data.priceEur != null ? data.priceEur : null,
-			};
-		});
+		const locations = await getLocations(db);
 		return json(locations);
 	} catch (e) {
 		console.error(e);
@@ -40,11 +31,11 @@ export const PUT: APIRoute = async ({ request }) => {
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
 		const body = (await request.json()) as
-			| { id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }
-			| { items?: Array<{ id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }> };
+			| { id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number | string | null }
+			| { items?: Array<{ id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number | string | null }> };
 		const items = Array.isArray((body as { items?: unknown }).items)
-			? (body as { items: Array<{ id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }> }).items
-			: [body as { id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number }];
+			? (body as { items: Array<{ id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number | string | null }> }).items
+			: [body as { id?: string; slug?: string; label?: string; sort_order?: number; price_eur?: number | string | null }];
 		for (const item of items) {
 			const id = String(item.id ?? item.slug ?? '').trim();
 			if (!id) continue;
@@ -56,6 +47,7 @@ export const PUT: APIRoute = async ({ request }) => {
 			if (item.price_eur !== undefined) update.priceEur = item.price_eur === null || item.price_eur === '' ? null : Number(item.price_eur);
 			if (Object.keys(update).length > 0) await ref.set(update, { merge: true });
 		}
+		invalidate('locations');
 		return json({ ok: true });
 	} catch (e) {
 		console.error(e);
@@ -69,7 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
-		const body = (await request.json()) as { slug?: string; label?: string; sort_order?: number; price_eur?: number };
+		const body = (await request.json()) as { slug?: string; label?: string; sort_order?: number; price_eur?: number | string | null };
 		const slug = String(body.slug ?? '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || null;
 		if (!slug) return json({ error: 'slug required' }, 400);
 		const label = String(body.label ?? '').trim();
@@ -79,6 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
 		const snap = await ref.get();
 		if (snap.exists) return json({ error: 'Location with this slug already exists' }, 409);
 		await ref.set({ slug, label, sortOrder, priceEur });
+		invalidate('locations');
 		return json({ ok: true, id: slug });
 	} catch (e) {
 		console.error(e);
@@ -96,6 +89,7 @@ export const DELETE: APIRoute = async ({ request }) => {
 	if (!id) return json({ error: 'id required' }, 400);
 	try {
 		await db.collection('locations').doc(id).delete();
+		invalidate('locations');
 		return json({ ok: true });
 	} catch (e) {
 		console.error(e);

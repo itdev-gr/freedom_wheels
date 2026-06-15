@@ -4,6 +4,7 @@ import PublicLayout from '../../layouts/PublicLayout.astro';
 import en from '../../locales/en';
 import el from '../../locales/el';
 import { getDb } from '../../lib/firebase';
+import { getPrices, getLocations } from '../../lib/store';
 
 const { lang } = Astro.params;
 if (lang !== 'en' && lang !== 'el') {
@@ -23,35 +24,21 @@ const scooter = SCOOTERS[modelParam] ?? SCOOTERS['liberty-125'];
 
 let locations: Array<{ id: string; slug: string; label: string; sort_order: number; price_eur?: number | null }> = [];
 let pricesMatrix: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
+let loadedFromDb = false;
 try {
 	const db = getDb();
 	if (db) {
-		const [locSnap, priceSnap] = await Promise.all([
-			db.collection('locations').orderBy('sortOrder').get(),
-			db.collection('prices').get(),
-		]);
-		locations = locSnap.docs.map((d) => {
-			const data = d.data();
-			return {
-				id: d.id,
-				slug: data.slug,
-				label: data.label,
-				sort_order: data.sortOrder,
-				price_eur: data.priceEur != null ? data.priceEur : null,
-			};
-		});
-		pricesMatrix = priceSnap.docs.map((d) => {
-			const data = d.data();
-			return {
-				scooter_id: data.scooterId,
-				season: data.season,
-				days: data.days,
-				price_eur: data.priceEur,
-			};
-		});
+		[locations, pricesMatrix] = await Promise.all([getLocations(db), getPrices(db)]);
+		loadedFromDb = locations.length > 0;
 	}
 } catch {
 	// fallback
+}
+// Only let the CDN cache this page when real catalog data loaded — never cache
+// the degraded fallback (default locations, no prices) so the page self-heals
+// the moment Firestore is reachable again.
+if (loadedFromDb) {
+	Astro.response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
 }
 if (locations.length === 0) {
 	locations = [

@@ -17,7 +17,9 @@ export async function verifySession(
 	const auth = getAdminAuth();
 	if (!auth) return null;
 	try {
-		const decoded = await auth.verifyIdToken(token);
+		// The cookie holds a Firebase session cookie (created in /api/login), not a
+		// raw ID token — session cookies last days, ID tokens expire after 1 hour.
+		const decoded = await auth.verifySessionCookie(token, false);
 		return { uid: decoded.uid, email: decoded.email ?? null };
 	} catch {
 		return null;

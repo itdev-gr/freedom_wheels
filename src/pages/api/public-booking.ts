@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
 import { computeBookingTotal, fetchPricingData } from '../../lib/pricing';
+import { getScooters } from '../../lib/store';
 
 export const prerender = false;
 
@@ -76,9 +77,11 @@ export const POST: APIRoute = async ({ request }) => {
 			createdAt: new Date().toISOString(),
 		};
 
-		// Inventory check: overlapping non-cancelled bookings must be < scooter quantity
-		const scootersSnap = await db.collection('scooters').doc(scooterId).get();
-		const quantity = scootersSnap.exists ? Number((scootersSnap.data() as { quantity?: number }).quantity) || 0 : 0;
+		// Inventory check: overlapping non-cancelled bookings must be < scooter quantity.
+		// Stock count comes from the cached catalog; live bookings stay un-cached so
+		// availability is always accurate.
+		const scooters = await getScooters(db);
+		const quantity = scooters.find((s) => s.id === scooterId)?.quantity ?? 0;
 		const bookingsSnap = await db.collection('bookings').where('scooterId', '==', scooterId).get();
 		let overlappingCount = 0;
 		for (const d of bookingsSnap.docs) {

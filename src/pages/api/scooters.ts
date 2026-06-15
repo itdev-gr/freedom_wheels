@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../lib/firebase';
 import { verifySession } from '../../lib/auth';
+import { getScooters, invalidate } from '../../lib/store';
 
 export const prerender = false;
 
@@ -23,21 +24,19 @@ export const GET: APIRoute = async () => {
 	const db = getDb();
 	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
-		const snap = await db.collection('scooters').get();
+		const scooters = await getScooters(db);
 		const byId: Record<string, { id: string; label: string; quantity: number }> = {};
 		for (const id of DEFAULT_SCOOTER_IDS) {
 			byId[id] = { id, label: DEFAULT_LABELS[id] ?? id, quantity: 0 };
 		}
-		snap.docs.forEach((d) => {
-			const data = d.data();
-			byId[d.id] = {
-				id: d.id,
-				label: data.label ?? DEFAULT_LABELS[d.id] ?? d.id,
-				quantity: Number(data.quantity) || 0,
+		for (const s of scooters) {
+			byId[s.id] = {
+				id: s.id,
+				label: s.label ?? DEFAULT_LABELS[s.id] ?? s.id,
+				quantity: Number(s.quantity) || 0,
 			};
-		});
-		const list = Object.values(byId);
-		return json(list);
+		}
+		return json(Object.values(byId));
 	} catch (e) {
 		console.error(e);
 		return json({ error: 'Failed to fetch scooters' }, 500);
@@ -58,6 +57,7 @@ export const PUT: APIRoute = async ({ request }) => {
 		if (body.label !== undefined) update.label = String(body.label).trim();
 		if (body.quantity !== undefined) update.quantity = Number(body.quantity) || 0;
 		if (Object.keys(update).length > 0) await ref.set(update, { merge: true });
+		invalidate('scooters');
 		return json({ ok: true });
 	} catch (e) {
 		console.error(e);

@@ -61,7 +61,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			<div class="contact-form-wrap__inner">
 				<div class="contact-form-section">
 					<h2 class="contact-form-section__title">{t.contact.sendMessage}</h2>
-					<form class="contact-form" id="contact-form" action="#" method="post">
+					<form class="contact-form" id="contact-form" action="/api/contact" method="post">
 						<div class="contact-form__row">
 							<label class="contact-form__label" for="name">{t.contact.name} *</label>
 							<input class="contact-form__input" id="name" name="name" type="text" required />
@@ -79,6 +79,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 							<textarea class="contact-form__input contact-form__textarea" id="message" name="message" rows="5" required></textarea>
 						</div>
 						<button type="submit" class="contact-form__submit">{t.contact.send}</button>
+							<p id="contact-status" class="contact-form__status" role="status" aria-live="polite" hidden></p>
 					</form>
 				</div>
 				<div class="contact-map">
@@ -273,5 +274,64 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 		@media (max-width: 500px) {
 			.contact-cards { grid-template-columns: 1fr; }
 		}
+		.contact-form__status {
+			margin: 0.25rem 0 0;
+			font-size: 0.9rem;
+			padding: 0.6rem 0.85rem;
+			border-radius: 8px;
+		}
+		.contact-form__status--ok { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+		.contact-form__status--err { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 	</style>
+
+	<script is:inline define:vars={{ lang }}>
+		(function () {
+			var form = document.getElementById('contact-form');
+			var statusEl = document.getElementById('contact-status');
+			if (!form) return;
+			var isEl = lang === 'el';
+			var strings = {
+				sending: isEl ? 'Αποστολή…' : 'Sending…',
+				ok: isEl ? 'Ευχαριστούμε! Το μήνυμά σας στάλθηκε.' : 'Thanks! Your message has been sent.',
+				err: isEl
+					? 'Κάτι πήγε στραβά. Δοκιμάστε ξανά ή στείλτε μας email στο info@freedomwheels.gr.'
+					: 'Something went wrong. Please try again or email us at info@freedomwheels.gr.',
+			};
+			function show(msg, ok) {
+				if (!statusEl) return;
+				statusEl.textContent = msg;
+				statusEl.hidden = false;
+				statusEl.classList.remove('contact-form__status--ok', 'contact-form__status--err');
+				statusEl.classList.add(ok ? 'contact-form__status--ok' : 'contact-form__status--err');
+			}
+			form.addEventListener('submit', function (e) {
+				e.preventDefault();
+				var btn = form.querySelector('.contact-form__submit');
+				var payload = {
+					name: (document.getElementById('name') || {}).value || '',
+					email: (document.getElementById('email') || {}).value || '',
+					phone: (document.getElementById('phone') || {}).value || '',
+					message: (document.getElementById('message') || {}).value || '',
+				};
+				if (btn) btn.disabled = true;
+				show(strings.sending, true);
+				fetch('/api/contact', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(payload),
+				})
+					.then(function (res) { return res.ok; })
+					.then(function (success) {
+						if (success) {
+							show(strings.ok, true);
+							form.reset();
+						} else {
+							show(strings.err, false);
+						}
+					})
+					.catch(function () { show(strings.err, false); })
+					.finally(function () { if (btn) btn.disabled = false; });
+			});
+		})();
+	</script>
 </PublicLayout>
