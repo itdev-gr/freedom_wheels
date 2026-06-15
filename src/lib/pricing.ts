@@ -1,13 +1,12 @@
-import type { Firestore } from 'firebase-admin/firestore';
 import { getPrices, getLocations } from './store.ts';
 
 export type PriceRow = { scooter_id: string; season: string; days: number; price_eur: number };
 export type LocationRow = { id: string; slug?: string; price_eur?: number | null };
 
 // Reads go through the cached catalog store so the checkout and booking paths
-// do not hit Firestore on every request (see src/lib/store.ts).
-export async function fetchPricingData(db: Firestore): Promise<{ prices: PriceRow[]; locations: LocationRow[] }> {
-	const [prices, locations] = await Promise.all([getPrices(db), getLocations(db)]);
+// do not hit the backend on every request (see src/lib/store.ts).
+export async function fetchPricingData(): Promise<{ prices: PriceRow[]; locations: LocationRow[] }> {
+	const [prices, locations] = await Promise.all([getPrices(), getLocations()]);
 	return { prices, locations };
 }
 
@@ -36,8 +35,9 @@ function getPriceFromMatrix(prices: PriceRow[], scooterId: string, season: strin
 	return row ? Number(row.price_eur) : NaN;
 }
 
-// A location can be referenced by its Firestore doc id or by its slug — they can
-// differ (console-created docs get auto ids; dashboard slug edits keep the old id).
+// A location is referenced by its slug (the app's location identifier IS the
+// slug); both loc.id and loc.slug resolve to it, so match on either to stay
+// tolerant of older callers.
 function matchesLocation(loc: LocationRow, selected: string): boolean {
 	return selected !== '' && (loc.id === selected || loc.slug === selected);
 }

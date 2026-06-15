@@ -1,14 +1,14 @@
-import type { Firestore } from 'firebase-admin/firestore';
+import { listRecords } from './supabase.ts';
 
 // In-memory TTL cache for the near-static catalog collections (prices,
 // locations, scooters). These change only when an admin edits them in the
-// dashboard, but were being re-read from Firestore on every public booking
-// page view and every checkout — which exhausted the Firestore free-tier
-// daily read quota and took the site down. Caching collapses thousands of
+// central dashboard, but would otherwise be re-read from the backend on every
+// public booking page view and every checkout. Caching collapses thousands of
 // reads into roughly one per collection per TTL window per warm instance.
 //
-// Writes (dashboard edits) call invalidate() so the same instance reflects
-// the change immediately; other instances pick it up within TTL_MS.
+// (Catalog writes now happen in the separate central dashboard, not this site,
+// so this site no longer needs an invalidate() hook — entries simply refresh
+// within TTL.)
 
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -37,49 +37,42 @@ export type LocationRow = {
 };
 export type ScooterRow = { id: string; label: string | null; quantity: number };
 
-export function getPrices(db: Firestore): Promise<PriceRow[]> {
+export function getPrices(): Promise<PriceRow[]> {
 	return cached('prices', async () => {
-		const snap = await db.collection('prices').get();
-		return snap.docs.map((d) => {
-			const data = d.data();
-			return {
-				scooter_id: data.scooterId,
-				season: data.season,
-				days: data.days,
-				price_eur: data.priceEur,
-			};
-		});
+		const records = await listRecords('prices');
+		return records.map((data) => ({
+			scooter_id: data.scooterId as string,
+			season: data.season as string,
+			days: data.days as number,
+			price_eur: data.priceEur as number,
+		}));
 	});
 }
 
-export function getLocations(db: Firestore): Promise<LocationRow[]> {
+export function getLocations(): Promise<LocationRow[]> {
 	return cached('locations', async () => {
-		const snap = await db.collection('locations').get();
-		const locations = snap.docs.map((d) => {
-			const data = d.data();
-			return {
-				id: d.id,
-				slug: data.slug,
-				label: data.label,
-				sort_order: data.sortOrder,
-				price_eur: data.priceEur != null ? data.priceEur : null,
-			};
-		});
+		const records = await listRecords('locations');
+		const locations = records.map((data) => ({
+			// The app's location identifier IS the slug.
+			id: data.slug as string,
+			slug: data.slug as string,
+			label: data.label as string,
+			sort_order: data.sortOrder as number,
+			price_eur: data.priceEur != null ? (data.priceEur as number) : null,
+		}));
 		locations.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 		return locations;
 	});
 }
 
-export function getScooters(db: Firestore): Promise<ScooterRow[]> {
+export function getScooters(): Promise<ScooterRow[]> {
 	return cached('scooters', async () => {
-		const snap = await db.collection('scooters').get();
-		return snap.docs.map((d) => {
-			const data = d.data();
-			return {
-				id: d.id,
-				label: data.label ?? null,
-				quantity: Number(data.quantity) || 0,
-			};
-		});
+		const records = await listRecords('scooters');
+		return records.map((data) => ({
+			// The app's scooter "id" IS the code.
+			id: data.code as string,
+			label: (data.label as string) ?? null,
+			quantity: Number(data.quantity) || 0,
+		}));
 	});
 }

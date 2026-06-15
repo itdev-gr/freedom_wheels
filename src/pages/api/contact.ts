@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getDb } from '../../lib/firebase';
+import { submitRecord } from '../../lib/supabase';
 
 export const prerender = false;
 
@@ -11,8 +11,6 @@ function json(body: unknown, status = 200) {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-	const db = getDb();
-	if (!db) return json({ error: 'Messaging not configured' }, 503);
 	try {
 		const body = (await request.json()) as {
 			name?: string;
@@ -29,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
 		if (!email) return json({ error: 'Email is required' }, 400);
 		if (!message) return json({ error: 'Message is required' }, 400);
 
-		await db.collection('messages').add({
+		await submitRecord('messages', {
 			name,
 			email,
 			phone,

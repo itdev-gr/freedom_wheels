@@ -3,7 +3,6 @@ export const prerender = false;
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import en from '../../locales/en';
 import el from '../../locales/el';
-import { getDb } from '../../lib/firebase';
 import { getPrices, getLocations } from '../../lib/store';
 
 const { lang } = Astro.params;
@@ -26,17 +25,14 @@ let locations: Array<{ id: string; slug: string; label: string; sort_order: numb
 let pricesMatrix: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
 let loadedFromDb = false;
 try {
-	const db = getDb();
-	if (db) {
-		[locations, pricesMatrix] = await Promise.all([getLocations(db), getPrices(db)]);
-		loadedFromDb = locations.length > 0;
-	}
+	[locations, pricesMatrix] = await Promise.all([getLocations(), getPrices()]);
+	loadedFromDb = locations.length > 0;
 } catch {
 	// fallback
 }
 // Only let the CDN cache this page when real catalog data loaded — never cache
 // the degraded fallback (default locations, no prices) so the page self-heals
-// the moment Firestore is reachable again.
+// the moment the backend is reachable again.
 if (loadedFromDb) {
 	Astro.response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
 }

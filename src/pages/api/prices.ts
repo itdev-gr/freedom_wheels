@@ -1,7 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getDb } from '../../lib/firebase';
-import { verifySession } from '../../lib/auth';
-import { getPrices, invalidate } from '../../lib/store';
+import { getPrices } from '../../lib/store';
 
 export const prerender = false;
 
@@ -12,19 +10,13 @@ function json(body: unknown, status = 200) {
 	});
 }
 
-function docId(scooterId: string, season: string, days: number) {
-	return `${scooterId}_${season}_${days}`;
-}
-
 export const GET: APIRoute = async ({ request }) => {
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
 	const url = new URL(request.url);
 	const scooter = url.searchParams.get('scooter');
 	const season = url.searchParams.get('season');
 	const daysParam = url.searchParams.get('days');
 	try {
-		let prices = await getPrices(db);
+		let prices = await getPrices();
 		if (scooter) prices = prices.filter((p) => p.scooter_id === scooter);
 		if (season) prices = prices.filter((p) => p.season === season);
 		if (daysParam) prices = prices.filter((p) => p.days === parseInt(daysParam, 10));
@@ -32,30 +24,5 @@ export const GET: APIRoute = async ({ request }) => {
 	} catch (e) {
 		console.error(e);
 		return json({ error: 'Failed to fetch prices' }, 500);
-	}
-};
-
-export const PUT: APIRoute = async ({ request }) => {
-	const session = await verifySession(request);
-	if (!session) return json({ error: 'Unauthorized' }, 401);
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
-	try {
-		const body = await request.json();
-		const items = Array.isArray(body) ? body : [body];
-		for (const item of items) {
-			const scooterId = String(item.scooter_id ?? item.scooterId ?? '').trim();
-			const season = String(item.season ?? '').trim();
-			const days = Number(item.days);
-			const priceEur = Number(item.price_eur ?? item.priceEur);
-			if (!scooterId || !season || days < 1 || days > 7) continue;
-			const id = docId(scooterId, season, days);
-			await db.collection('prices').doc(id).set({ scooterId, season, days, priceEur }, { merge: true });
-		}
-		invalidate('prices');
-		return json({ ok: true });
-	} catch (e) {
-		console.error(e);
-		return json({ error: 'Failed to update prices' }, 500);
 	}
 };

@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { getDb } from '../../lib/firebase';
 import { computeBookingTotal, fetchPricingData } from '../../lib/pricing';
 
 export const prerender = false;
@@ -36,11 +35,9 @@ export const POST: APIRoute = async ({ request, url }) => {
 			lang?: string;
 		};
 
-		// Recompute the total server-side from Firestore prices and location fees —
+		// Recompute the total server-side from the catalog prices and location fees —
 		// the client-sent totalEur is display-only and must not decide the charge.
-		const db = getDb();
-		if (!db) return json({ error: 'Database not configured' }, 503);
-		const { prices, locations } = await fetchPricingData(db);
+		const { prices, locations } = await fetchPricingData();
 		const computed = computeBookingTotal({
 			scooterId: String(body.scooterId ?? '').trim(),
 			pickupDate: String(body.pickupDate ?? '').trim(),

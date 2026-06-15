@@ -3,7 +3,7 @@ export const prerender = false;
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import en from '../../locales/en';
 import el from '../../locales/el';
-import { getDb } from '../../lib/firebase';
+import { getPrices } from '../../lib/store';
 
 const { lang } = Astro.params;
 if (lang !== 'en' && lang !== 'el') {
@@ -14,19 +14,7 @@ const t = lang === 'el' ? el : en;
 
 let prices: Array<{ scooter_id: string; season: string; days: number; price_eur: number }> = [];
 try {
-	const db = getDb();
-	if (db) {
-		const priceSnap = await db.collection('prices').get();
-		prices = priceSnap.docs.map((d) => {
-			const data = d.data();
-			return {
-				scooter_id: data.scooterId,
-				season: data.season,
-				days: data.days,
-				price_eur: data.priceEur,
-			};
-		});
-	}
+	prices = await getPrices();
 } catch {
 	// leave prices empty
 }

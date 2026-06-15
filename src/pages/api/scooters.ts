@@ -1,7 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getDb } from '../../lib/firebase';
-import { verifySession } from '../../lib/auth';
-import { getScooters, invalidate } from '../../lib/store';
+import { getScooters } from '../../lib/store';
 
 export const prerender = false;
 
@@ -21,10 +19,8 @@ const DEFAULT_LABELS: Record<string, string> = {
 };
 
 export const GET: APIRoute = async () => {
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
-		const scooters = await getScooters(db);
+		const scooters = await getScooters();
 		const byId: Record<string, { id: string; label: string; quantity: number }> = {};
 		for (const id of DEFAULT_SCOOTER_IDS) {
 			byId[id] = { id, label: DEFAULT_LABELS[id] ?? id, quantity: 0 };
@@ -40,27 +36,5 @@ export const GET: APIRoute = async () => {
 	} catch (e) {
 		console.error(e);
 		return json({ error: 'Failed to fetch scooters' }, 500);
-	}
-};
-
-export const PUT: APIRoute = async ({ request }) => {
-	const session = await verifySession(request);
-	if (!session) return json({ error: 'Unauthorized' }, 401);
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
-	try {
-		const body = (await request.json()) as { id: string; label?: string; quantity?: number };
-		const id = String(body.id ?? '').trim();
-		if (!id) return json({ error: 'id required' }, 400);
-		const ref = db.collection('scooters').doc(id);
-		const update: Record<string, unknown> = {};
-		if (body.label !== undefined) update.label = String(body.label).trim();
-		if (body.quantity !== undefined) update.quantity = Number(body.quantity) || 0;
-		if (Object.keys(update).length > 0) await ref.set(update, { merge: true });
-		invalidate('scooters');
-		return json({ ok: true });
-	} catch (e) {
-		console.error(e);
-		return json({ error: 'Failed to update scooter' }, 500);
 	}
 };

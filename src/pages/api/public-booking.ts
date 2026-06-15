@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
-import { getDb } from '../../lib/firebase';
 import { computeBookingTotal, fetchPricingData } from '../../lib/pricing';
 import { getScooters } from '../../lib/store';
+import { submitRecord, countActiveBookings } from '../../lib/supabase';
 
 export const prerender = false;
 
@@ -13,8 +13,6 @@ function json(body: unknown, status = 200) {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-	const db = getDb();
-	if (!db) return json({ error: 'Database not configured' }, 503);
 	try {
 		const body = (await request.json()) as {
 			customerName?: string;
@@ -46,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
 		// so a booking that was already paid is never dropped.
 		let totalEur = Number(body.totalEur) || 0;
 		try {
-			const { prices, locations } = await fetchPricingData(db);
+			const { prices, locations } = await fetchPricingData();
 			const computed = computeBookingTotal({
 				scooterId,
 				pickupDate,
@@ -71,27 +69,18 @@ export const POST: APIRoute = async ({ request }) => {
 			pickupLocationId: String(body.pickupLocationId ?? '').trim(),
 			returnLocationId: String(body.returnLocationId ?? '').trim(),
 			totalEur,
-			status: String(body.status ?? 'Pending').trim(),
+			status: String(body.status ?? 'pending').trim().toLowerCase(),
 			notes: String(body.notes ?? '').trim(),
 			paymentMethod: String(body.paymentMethod ?? 'delivery').trim(),
 			createdAt: new Date().toISOString(),
 		};
 
 		// Inventory check: overlapping non-cancelled bookings must be < scooter quantity.
-		// Stock count comes from the cached catalog; live bookings stay un-cached so
-		// availability is always accurate.
-		const scooters = await getScooters(db);
+		// Stock count comes from the cached catalog; the overlap count is computed
+		// live by the backend RPC so availability is always accurate.
+		const scooters = await getScooters();
 		const quantity = scooters.find((s) => s.id === scooterId)?.quantity ?? 0;
-		const bookingsSnap = await db.collection('bookings').where('scooterId', '==', scooterId).get();
-		let overlappingCount = 0;
-		for (const d of bookingsSnap.docs) {
-			const data = d.data();
-			const statusLower = String(data.status ?? '').toLowerCase();
-			if (statusLower === 'cancelled' || statusLower === 'canceled') continue;
-			const exPickup = String(data.pickupDate ?? '');
-			const exReturn = String(data.returnDate ?? '');
-			if (exPickup < returnDate && exReturn > pickupDate) overlappingCount++;
-		}
+		const overlappingCount = await countActiveBookings(scooterId, pickupDate, returnDate);
 		if (overlappingCount >= quantity) {
 			return json(
 				{ error: 'No availability for this scooter on the selected dates. Try different dates or another scooter.' },
@@ -99,8 +88,8 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		const ref = await db.collection('bookings').add(doc);
-		return json({ ok: true, id: ref.id });
+		const id = await submitRecord('bookings', doc);
+		return json({ ok: true, id });
 	} catch (e) {
 		console.error(e);
 		return json({ error: 'Failed to create booking' }, 500);
