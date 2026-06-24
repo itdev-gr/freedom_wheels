@@ -1,0 +1,16 @@
+---
+// FreedomWheels staff sign-in entry point.
+//
+// FreedomWheels has no admin UI of its own. Staff manage the site (bookings,
+// messages, catalog) from the shared itdev dashboard, which already holds all
+// FreedomWheels data. Visiting /admin simply forwards them to that dashboard's
+// login; after signing in they land on their FreedomWheels project there.
+//
+// Rendered on-demand (not prerendered) so the redirect happens server-side as a
+// real 302 with no flash of content.
+export const prerender = false;
+
+const DASHBOARD_LOGIN = 'https://generaldashboard-six.vercel.app/login';
+
+return Astro.redirect(DASHBOARD_LOGIN, 302);
+---
