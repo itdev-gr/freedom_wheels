@@ -3,6 +3,7 @@ export const prerender = false;
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import en from '../../locales/en';
 import el from '../../locales/el';
+import { A2_SCOOTER_IDS } from '../../lib/licence';
 
 const { lang } = Astro.params;
 if (lang !== 'en' && lang !== 'el') {
@@ -17,12 +18,15 @@ const sessionId = Astro.url.searchParams.get('session_id') ?? '';
 const site = Astro.site ?? new URL(Astro.url.pathname);
 const canonical = new URL(Astro.url.pathname, site).href;
 const ogImage = new URL('/logos/logo.webp', site).href;
+
+// Shipped to the inline script so it can pick A1/A2 wording from booking.model
+const a2ScooterIds = [...A2_SCOOTER_IDS];
 ---
 
 <PublicLayout lang={lang} title={t.checkout.title} description={t.checkout.description} canonical={canonical} ogImage={ogImage} t={t}>
 	<main class="page">
 		<section class="checkout-section">
-			<div id="checkout-lang" data-lang={lang} data-i18n-day={t.booking.dayUnit} data-i18n-days={t.booking.daysUnit} data-i18n-error-name={t.checkout.errorName} data-i18n-error-email={t.checkout.errorEmail} data-i18n-error-phone={t.checkout.errorPhone} data-i18n-licence-error={t.checkout.licenceError} data-i18n-redirecting={t.checkout.redirecting} data-i18n-online-payment={t.checkout.onlinePayment} data-i18n-error-payment={t.checkout.errorPaymentSession} data-i18n-error-network={t.checkout.errorNetwork} hidden></div>
+			<div id="checkout-lang" data-lang={lang} data-i18n-day={t.booking.dayUnit} data-i18n-days={t.booking.daysUnit} data-i18n-error-name={t.checkout.errorName} data-i18n-error-email={t.checkout.errorEmail} data-i18n-error-phone={t.checkout.errorPhone} data-i18n-licence-error={t.checkout.licenceError} data-i18n-licence-error-a2={t.checkout.licenceErrorA2} data-i18n-redirecting={t.checkout.redirecting} data-i18n-online-payment={t.checkout.onlinePayment} data-i18n-error-payment={t.checkout.errorPaymentSession} data-i18n-error-network={t.checkout.errorNetwork} hidden></div>
 
 			<div id="success-banner" class="checkout-success" style="display:none;">
 				<div class="checkout-success__icon">&#10003;</div>
@@ -51,7 +55,10 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 					<div class="checkout-field checkout-field--checkbox">
 						<label class="checkout-checkbox">
 							<input type="checkbox" id="licence-confirm" />
-							<span>{t.checkout.licenceConfirm} <span class="required">*</span></span>
+							<span>
+								<span id="licence-confirm-text" data-text-a1={t.checkout.licenceConfirm} data-text-a2={t.checkout.licenceConfirmA2}>{t.checkout.licenceConfirm}</span>
+								<span class="required">*</span>
+							</span>
 						</label>
 					</div>
 					<div class="checkout-field">
@@ -269,7 +276,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 		}
 	</style>
 
-	<script is:inline define:vars={{ isSuccess, sessionId }}>
+	<script is:inline define:vars={{ isSuccess, sessionId, a2ScooterIds }}>
 		(function () {
 			var langEl = document.getElementById('checkout-lang');
 			var lang = (langEl && langEl.getAttribute('data-lang')) || 'en';
@@ -279,6 +286,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			var i18nErrorEmail = (langEl && langEl.getAttribute('data-i18n-error-email')) || 'Please enter your email address.';
 			var i18nErrorPhone = (langEl && langEl.getAttribute('data-i18n-error-phone')) || 'Please enter your phone number.';
 			var i18nLicenceError = (langEl && langEl.getAttribute('data-i18n-licence-error')) || 'You must confirm that you hold a valid A1 driving licence to proceed.';
+			var i18nLicenceErrorA2 = (langEl && langEl.getAttribute('data-i18n-licence-error-a2')) || 'You must confirm that you hold a valid A2 driving licence to proceed.';
 			var i18nRedirecting = (langEl && langEl.getAttribute('data-i18n-redirecting')) || 'Redirecting...';
 			var i18nOnlinePayment = (langEl && langEl.getAttribute('data-i18n-online-payment')) || 'Online Payment';
 			var i18nErrorPayment = (langEl && langEl.getAttribute('data-i18n-error-payment')) || 'Failed to create payment session.';
@@ -374,6 +382,17 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 			if (sumDays) sumDays.textContent = booking.totalDays + (booking.totalDays === 1 ? ' ' + i18nDay : ' ' + i18nDays);
 			if (sumTotal) sumTotal.textContent = '\u20AC' + Number(booking.totalEur).toFixed(2);
 
+			// A2 wording for the 200cc/300cc models; A1 for everything else.
+			var ids = Array.isArray(a2ScooterIds) ? a2ScooterIds : [];
+			var requiredLicence = ids.indexOf(booking.model) !== -1 ? 'A2' : 'A1';
+			var licenceErrorMsg = requiredLicence === 'A2' ? i18nLicenceErrorA2 : i18nLicenceError;
+			var licenceText = document.getElementById('licence-confirm-text');
+			if (licenceText) {
+				var attr = requiredLicence === 'A2' ? 'data-text-a2' : 'data-text-a1';
+				var txt = licenceText.getAttribute(attr);
+				if (txt) licenceText.textContent = txt;
+			}
+
 			function getFormData() {
 				return {
 					name: (document.getElementById('full-name')?.value || '').trim(),
@@ -390,7 +409,7 @@ const ogImage = new URL('/logos/logo.webp', site).href;
 				if (!form.phone) { showError(i18nErrorPhone); return null; }
 				var licenceBox = document.getElementById('licence-confirm');
 				if (licenceBox && !licenceBox.checked) {
-					showError(i18nLicenceError);
+					showError(licenceErrorMsg);
 					return null;
 				}
 				hideError();

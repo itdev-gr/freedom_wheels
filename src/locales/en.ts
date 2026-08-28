@@ -198,6 +198,8 @@ const en = {
 		onlinePayment: 'Online Payment',
 		licenceConfirm: 'I confirm that I hold a valid A1 driving licence (or equivalent)',
 		licenceError: 'You must confirm that you hold a valid A1 driving licence to proceed.',
+		licenceConfirmA2: 'I confirm that I hold a valid A2 driving licence (or equivalent)',
+		licenceErrorA2: 'You must confirm that you hold a valid A2 driving licence to proceed.',
 		bookingConfirmed: 'Booking Confirmed!',
 		thankYou: 'Thank you for your booking. We will contact you shortly to confirm all the details.',
 		backToHome: 'Back to Home',
